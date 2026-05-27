@@ -25,7 +25,7 @@ def generate_dataset(num_samples):
         C = np.random.uniform(1, 30)
         initial_hawk = np.random.uniform(0, 1)
         iterations = np.random.randint(50, 200)
-
+        population_size = np.random.randint(100, 1000)
         final_hawk = simulate_hawk_dove(V, C, initial_hawk, iterations)
         final_dove = 1 - final_hawk
 
@@ -36,13 +36,14 @@ def generate_dataset(num_samples):
             "initial_dove": 1 - initial_hawk,
             "iterations": iterations,
             "final_hawk": final_hawk,
-            "final_dove": final_dove
+            "final_dove": final_dove,
+            "population_size": population_size
         })
 
     return pd.DataFrame(data)
 
 
-dataset = generate_dataset(1000)
+dataset = generate_dataset(10000)
 
 print(dataset.head())
 

@@ -47,6 +47,6 @@ dataset = generate_dataset(10000)
 
 print(dataset.head())
 
-dataset.to_csv("hawk_dove_dataset.csv", index=False)
+dataset.to_csv("data/raw/hawk_dove_dataset.csv", index=False)
 
 print("Dataset uspešno sačuvan kao hawk_dove_dataset.csv")

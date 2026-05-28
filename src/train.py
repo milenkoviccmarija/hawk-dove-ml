@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.ensemble import RandomForestRegressor
 
 from sklearn.model_selection import KFold, cross_val_score
-
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
@@ -13,29 +14,25 @@ from sklearn.metrics import (
 )
 
 
-# Učitavanje podataka
 X_train = pd.read_csv("data/processed/X_train_scaled.csv")
-
-y_train = pd.read_csv(
-    "data/processed/y_train.csv"
-).squeeze()
+y_train = pd.read_csv("data/processed/y_train.csv").squeeze()
 
 X_test = pd.read_csv("data/processed/X_test_scaled.csv")
-
-y_test = pd.read_csv(
-    "data/processed/y_test.csv"
-).squeeze()
+y_test = pd.read_csv("data/processed/y_test.csv").squeeze()
 
 
-# Definisanje modela
 models = {
     "Linear Regression": LinearRegression(),
     "Ridge Regression": Ridge(alpha=1.0),
-    "Lasso Regression": Lasso(alpha=0.001)
+    "Lasso Regression": Lasso(alpha=0.001),
+    "KNN Regression": KNeighborsRegressor(n_neighbors=5),
+    "Random Forest Regression": RandomForestRegressor(
+        n_estimators=100,
+        random_state=42
+    ),
 }
 
 
-# K-Fold Cross Validation
 kf = KFold(
     n_splits=5,
     shuffle=True,
@@ -48,7 +45,6 @@ results = []
 
 for model_name, model in models.items():
 
-    # Cross-validation R2 score
     cv_scores = cross_val_score(
         model,
         X_train,
@@ -57,19 +53,13 @@ for model_name, model in models.items():
         scoring="r2"
     )
 
-    # Treniranje modela na celom train skupu
     model.fit(X_train, y_train)
 
-    # Predikcija na test skupu
     y_pred = model.predict(X_test)
 
-    # Evaluacija
     mae = mean_absolute_error(y_test, y_pred)
-
     mse = mean_squared_error(y_test, y_pred)
-
     rmse = root_mean_squared_error(y_test, y_pred)
-
     r2 = r2_score(y_test, y_pred)
 
     results.append({
@@ -83,24 +73,15 @@ for model_name, model in models.items():
     })
 
     print(f"\n===== {model_name} =====")
-
-    print("Cross-validation R2 scores:")
-    print(cv_scores)
-
+    print("Cross-validation R2 scores:", cv_scores)
     print("Mean CV R2:", np.mean(cv_scores))
-
     print("Std CV R2:", np.std(cv_scores))
-
     print("Test MAE:", mae)
-
     print("Test MSE:", mse)
-
     print("Test RMSE:", rmse)
-
     print("Test R2:", r2)
 
 
-# Čuvanje rezultata
 results_df = pd.DataFrame(results)
 
 results_df.to_csv(
@@ -108,4 +89,19 @@ results_df.to_csv(
     index=False
 )
 
-print("\nRezultati su sačuvani.")
+with open("results/metrics/results_summary.txt", "w") as file:
+    file.write("Rezultati evaluacije regresionih modela\n")
+    file.write("======================================\n\n")
+
+    for result in results:
+        file.write(f"Model: {result['model']}\n")
+        file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
+        file.write(f"Std CV R2: {result['CV_R2_std']}\n")
+        file.write(f"Test MAE: {result['MAE']}\n")
+        file.write(f"Test MSE: {result['MSE']}\n")
+        file.write(f"Test RMSE: {result['RMSE']}\n")
+        file.write(f"Test R2: {result['R2_test']}\n")
+        file.write("\n")
+
+
+print("\nRezultati su sačuvani u results/metrics.")

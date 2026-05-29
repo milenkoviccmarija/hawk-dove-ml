@@ -1,114 +1,136 @@
 import pandas as pd
+from joblib import dump
+from pathlib import Path
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 
-# Učitavanje skupa podataka
-dataset = pd.read_csv("data/raw/hawk_dove_dataset.csv")
+RAW_DATA_PATH = Path("data/raw/hawk_dove_dataset.csv")
+PROCESSED_DATA_DIR = Path("data/processed")
+SCALER_PATH = Path("models/standard_scaler.joblib")
+RANDOM_SEED = 42
 
-print("Prvih 5 redova dataset-a:")
-print(dataset.head())
-
-print("\nInformacije o dataset-u:")
-print(dataset.info())
-
-print("\nProvera nedostajućih vrednosti:")
-print(dataset.isnull().sum())
-
-print("\nProvera duplikata:")
-print("Broj duplikata:", dataset.duplicated().sum())
-
-
-# Uklanjanje duplikata ako postoje
-dataset = dataset.drop_duplicates()
-
-
-# Ulazni atributi (features)
-X = dataset[
-    [
-        "V",
-        "C",
-        "initial_hawk",
-        "initial_dove",
-        "iterations",
-        "population_size",
-    ]
+FEATURE_COLUMNS = [
+    "V",
+    "C",
+    "initial_hawk",
+    "initial_dove",
+    "iterations",
+    "population_size",
 ]
-
-# Target promenljiva
-y = dataset["final_hawk"]
+TARGET_COLUMN = "final_hawk"
 
 
-# Podela podataka:
-# 70% train
-# 15% validation
-# 15% test
-
-X_train, X_temp, y_train, y_temp = train_test_split(
-    X,
-    y,
-    test_size=0.30,
-    random_state=42,
-)
-
-X_val, X_test, y_val, y_test = train_test_split(
-    X_temp,
-    y_temp,
-    test_size=0.50,
-    random_state=42,
-)
-
-print("\nVeličina skupova:")
-print("Train:", X_train.shape)
-print("Validation:", X_val.shape)
-print("Test:", X_test.shape)
+def load_dataset(path=RAW_DATA_PATH):
+    return pd.read_csv(path)
 
 
-# Skaliranje podataka
-scaler = StandardScaler()
+def print_dataset_report(dataset):
+    print("Prvih 5 redova dataset-a:")
+    print(dataset.head())
 
-X_train_scaled = scaler.fit_transform(X_train)
-X_val_scaled = scaler.transform(X_val)
-X_test_scaled = scaler.transform(X_test)
+    print("\nInformacije o dataset-u:")
+    print(dataset.info())
+
+    print("\nProvera nedostajućih vrednosti:")
+    print(dataset.isnull().sum())
+
+    print("\nProvera duplikata:")
+    print("Broj duplikata:", dataset.duplicated().sum())
 
 
-# Pretvaranje nazad u DataFrame
-X_train_scaled = pd.DataFrame(X_train_scaled, columns=X.columns)
-X_val_scaled = pd.DataFrame(X_val_scaled, columns=X.columns)
-X_test_scaled = pd.DataFrame(X_test_scaled, columns=X.columns)
+def split_dataset(dataset):
+    dataset = dataset.drop_duplicates()
+
+    X = dataset[FEATURE_COLUMNS]
+    y = dataset[TARGET_COLUMN]
+
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X,
+        y,
+        test_size=0.30,
+        random_state=RANDOM_SEED,
+    )
+
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp,
+        y_temp,
+        test_size=0.50,
+        random_state=RANDOM_SEED,
+    )
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
 
 
-# Čuvanje pretprocesiranih podataka
-X_train_scaled.to_csv(
-    "data/processed/X_train_scaled.csv",
-    index=False
-)
+def scale_features(X_train, X_val, X_test):
+    scaler = StandardScaler()
 
-X_val_scaled.to_csv(
-    "data/processed/X_val_scaled.csv",
-    index=False
-)
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_val_scaled = scaler.transform(X_val)
+    X_test_scaled = scaler.transform(X_test)
 
-X_test_scaled.to_csv(
-    "data/processed/X_test_scaled.csv",
-    index=False
-)
+    X_train_scaled = pd.DataFrame(X_train_scaled, columns=X_train.columns)
+    X_val_scaled = pd.DataFrame(X_val_scaled, columns=X_val.columns)
+    X_test_scaled = pd.DataFrame(X_test_scaled, columns=X_test.columns)
 
-y_train.to_csv(
-    "data/processed/y_train.csv",
-    index=False
-)
+    return X_train_scaled, X_val_scaled, X_test_scaled, scaler
 
-y_val.to_csv(
-    "data/processed/y_val.csv",
-    index=False
-)
 
-y_test.to_csv(
-    "data/processed/y_test.csv",
-    index=False
-)
+def save_processed_data(
+    X_train_scaled,
+    X_val_scaled,
+    X_test_scaled,
+    y_train,
+    y_val,
+    y_test,
+    scaler,
+):
+    PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    SCALER_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-print("\nPretprocesiranje uspešno završeno.")
-print("Sačuvani su train, validation i test skupovi.")
+    X_train_scaled.to_csv(PROCESSED_DATA_DIR / "X_train_scaled.csv", index=False)
+    X_val_scaled.to_csv(PROCESSED_DATA_DIR / "X_val_scaled.csv", index=False)
+    X_test_scaled.to_csv(PROCESSED_DATA_DIR / "X_test_scaled.csv", index=False)
+
+    y_train.to_csv(PROCESSED_DATA_DIR / "y_train.csv", index=False)
+    y_val.to_csv(PROCESSED_DATA_DIR / "y_val.csv", index=False)
+    y_test.to_csv(PROCESSED_DATA_DIR / "y_test.csv", index=False)
+
+    dump(scaler, SCALER_PATH)
+
+
+def main():
+    dataset = load_dataset()
+    print_dataset_report(dataset)
+
+    X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(dataset)
+
+    print("\nVeličina skupova:")
+    print("Train:", X_train.shape)
+    print("Validation:", X_val.shape)
+    print("Test:", X_test.shape)
+
+    X_train_scaled, X_val_scaled, X_test_scaled, scaler = scale_features(
+        X_train,
+        X_val,
+        X_test,
+    )
+
+    save_processed_data(
+        X_train_scaled,
+        X_val_scaled,
+        X_test_scaled,
+        y_train,
+        y_val,
+        y_test,
+        scaler,
+    )
+
+    print("\nPretprocesiranje uspešno završeno.")
+    print(f"Sačuvani su train, validation i test skupovi u {PROCESSED_DATA_DIR}.")
+    print(f"Scaler je sačuvan u {SCALER_PATH}.")
+
+
+if __name__ == "__main__":
+    main()

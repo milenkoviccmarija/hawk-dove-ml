@@ -17,6 +17,9 @@ FEATURE_COLUMNS = [
     "initial_hawk",
     "initial_dove",
     "iterations",
+    "learning_rate",
+    "mutation_rate",
+    "environment_volatility",
     "population_size",
 ]
 TARGET_COLUMN = "final_hawk"

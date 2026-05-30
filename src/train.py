@@ -5,7 +5,12 @@ from pathlib import Path
 
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import (
+    ExtraTreesRegressor,
+    GradientBoostingRegressor,
+    HistGradientBoostingRegressor,
+    RandomForestRegressor,
+)
 
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import (
@@ -43,6 +48,16 @@ def build_models():
         "KNN Regression": KNeighborsRegressor(n_neighbors=5),
         "Random Forest Regression": RandomForestRegressor(
             n_estimators=100,
+            random_state=RANDOM_SEED,
+        ),
+        "Extra Trees Regression": ExtraTreesRegressor(
+            n_estimators=100,
+            random_state=RANDOM_SEED,
+        ),
+        "Gradient Boosting Regression": GradientBoostingRegressor(
+            random_state=RANDOM_SEED,
+        ),
+        "Hist Gradient Boosting Regression": HistGradientBoostingRegressor(
             random_state=RANDOM_SEED,
         ),
     }

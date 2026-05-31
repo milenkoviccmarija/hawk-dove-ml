@@ -1,6 +1,121 @@
 Rezultati evaluacije regresionih modela
 ======================================
 
+Izbor broja suseda za KNN regresiju
+-----------------------------------
+Najbolji broj suseda prema CV R2: 15
+
+k = 1
+Mean CV R2: 0.6051199286214075
+Std CV R2: 0.017497378178287948
+
+k = 3
+Mean CV R2: 0.7570061504804773
+Std CV R2: 0.004488864585974107
+
+k = 5
+Mean CV R2: 0.7858378749686656
+Std CV R2: 0.00301142725150286
+
+k = 7
+Mean CV R2: 0.8013816148650891
+Std CV R2: 0.00468151366173956
+
+k = 9
+Mean CV R2: 0.8076529241803616
+Std CV R2: 0.00431930628267612
+
+k = 11
+Mean CV R2: 0.8084585744257463
+Std CV R2: 0.00593330232142123
+
+k = 15
+Mean CV R2: 0.8099542163296878
+Std CV R2: 0.005090009823101345
+
+k = 21
+Mean CV R2: 0.8077959946140846
+Std CV R2: 0.0041532241695753135
+
+k = 31
+Mean CV R2: 0.8020538938113237
+Std CV R2: 0.0023172272435662156
+
+Izbor lambda/alpha parametra za Ridge i Lasso
+---------------------------------------------
+Najbolji alpha za Ridge: 0.1
+Najbolji alpha za Lasso: 0.001
+
+Model: Ridge Regression
+alpha = 0.0001
+Mean CV R2: 0.8040849240951783
+Std CV R2: 0.004250888939272208
+
+Model: Ridge Regression
+alpha = 0.001
+Mean CV R2: 0.8040849241201473
+Std CV R2: 0.004250890364196073
+
+Model: Ridge Regression
+alpha = 0.01
+Mean CV R2: 0.8040849243674609
+Std CV R2: 0.004250904613395405
+
+Model: Ridge Regression
+alpha = 0.1
+Mean CV R2: 0.8040849266031398
+Std CV R2: 0.004251047101448156
+
+Model: Ridge Regression
+alpha = 1.0
+Mean CV R2: 0.8040849252225902
+Std CV R2: 0.004252471587679887
+
+Model: Ridge Regression
+alpha = 10.0
+Mean CV R2: 0.8040825463085108
+Std CV R2: 0.004266676773449803
+
+Model: Ridge Regression
+alpha = 100.0
+Mean CV R2: 0.8038306406670991
+Std CV R2: 0.004404550309389402
+
+Model: Lasso Regression
+alpha = 0.0001
+Mean CV R2: 0.8041008228859925
+Std CV R2: 0.004266385885775102
+
+Model: Lasso Regression
+alpha = 0.001
+Mean CV R2: 0.8041336856097596
+Std CV R2: 0.004396140981575518
+
+Model: Lasso Regression
+alpha = 0.01
+Mean CV R2: 0.800276383863374
+Std CV R2: 0.004772190760906507
+
+Model: Lasso Regression
+alpha = 0.1
+Mean CV R2: 0.5454915721665907
+Std CV R2: 0.004812187392159685
+
+Model: Lasso Regression
+alpha = 1.0
+Mean CV R2: -0.0011810672041636216
+Std CV R2: 0.0008971375581118821
+
+Model: Lasso Regression
+alpha = 10.0
+Mean CV R2: -0.0011810672041636216
+Std CV R2: 0.0008971375581118821
+
+Model: Lasso Regression
+alpha = 100.0
+Mean CV R2: -0.0011810672041636216
+Std CV R2: 0.0008971375581118821
+
 Model: Linear Regression
 Mean CV R2: 0.8040849240924013
 Std CV R2: 0.004250888780947341
@@ -9,15 +124,15 @@ Validation MSE: 0.015487921589225578
 Validation RMSE: 0.12445047846121596
 Validation R2: 0.8111598269342621
 
-Model: Ridge Regression
-Mean CV R2: 0.8040849252225902
-Std CV R2: 0.004252471587679887
-Validation MAE: 0.09707314091877853
-Validation MSE: 0.015488263225158007
-Validation RMSE: 0.12445185103146521
-Validation R2: 0.8111556614567812
+Model: Ridge Regression (alpha=0.1)
+Mean CV R2: 0.8040849266031398
+Std CV R2: 0.004251047101448156
+Validation MAE: 0.09707267241662228
+Validation MSE: 0.015487955634702897
+Validation RMSE: 0.12445061524437273
+Validation R2: 0.8111594118266706
 
-Model: Lasso Regression
+Model: Lasso Regression (alpha=0.001)
 Mean CV R2: 0.8041336856097596
 Std CV R2: 0.004396140981575518
 Validation MAE: 0.09705166554890889
@@ -25,50 +140,41 @@ Validation MSE: 0.015497069737258616
 Validation RMSE: 0.12448722720527844
 Validation R2: 0.8110482859603595
 
-Model: KNN Regression
-Mean CV R2: 0.7858378749686656
-Std CV R2: 0.00301142725150286
-Validation MAE: 0.09607824134394496
-Validation MSE: 0.016798435043991495
-Validation RMSE: 0.1296087768786956
-Validation R2: 0.7951810794840468
-
-Model: Random Forest Regression
-Mean CV R2: 0.8780955603064271
-Std CV R2: 0.003551646404516122
-Validation MAE: 0.07237782937606489
-Validation MSE: 0.009189717416740857
-Validation RMSE: 0.09586301381002403
-Validation R2: 0.8879521814850987
-
-Model: Extra Trees Regression
-Mean CV R2: 0.877004158808114
-Std CV R2: 0.0036654222399320102
-Validation MAE: 0.07370034765494159
-Validation MSE: 0.009473301213151509
-Validation RMSE: 0.0973308851965886
-Validation R2: 0.8844945185001517
-
-Model: Gradient Boosting Regression
-Mean CV R2: 0.8804758517155603
-Std CV R2: 0.002674493736602762
-Validation MAE: 0.07413751112029345
-Validation MSE: 0.009520328454968596
-Validation RMSE: 0.09757217049429923
-Validation R2: 0.8839211276528143
-
-Model: Hist Gradient Boosting Regression
-Mean CV R2: 0.8814529018690311
-Std CV R2: 0.0026530440329703645
-Validation MAE: 0.07324178606820957
-Validation MSE: 0.009354081016134162
-Validation RMSE: 0.0967164981589706
-Validation R2: 0.8859481391495065
+Model: KNN Regression (k=15)
+Mean CV R2: 0.8099542163296878
+Std CV R2: 0.005090009823101345
+Validation MAE: 0.0931574538193593
+Validation MSE: 0.015046229813368377
+Validation RMSE: 0.12266307436783239
+Validation R2: 0.8165452591185658
 
 Najbolji model
 --------------
-Model: Random Forest Regression
-Test MAE: 0.07491733318973742
-Test MSE: 0.009758380349870846
-Test RMSE: 0.09878451472711118
-Test R2: 0.8797478000424379
+Model: KNN Regression (k=15)
+Test MAE: 0.09592804373066834
+Test MSE: 0.01540846345756929
+Test RMSE: 0.1241308320183559
+Test R2: 0.8101220118190071
+
+Primer klasifikacije
+--------------------
+Cilj: hawk_dominant, odnosno da li je final_hawk > 0.5
+Model: Logistic Regression
+Test accuracy: 0.9173333333333333
+Test precision: 0.9341692789968652
+Test recall: 0.9361256544502617
+Confusion matrix:
+[[482  63]
+ [ 61 894]]
+
+Classification report:
+              precision    recall  f1-score   support
+
+           0       0.89      0.88      0.89       545
+           1       0.93      0.94      0.94       955
+
+    accuracy                           0.92      1500
+   macro avg       0.91      0.91      0.91      1500
+weighted avg       0.92      0.92      0.92      1500
+
+Napomena: klasifikacija daje samo klasu hawk/dove, dok regresija daje tacan udeo final_hawk.

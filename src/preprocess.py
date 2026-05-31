@@ -23,6 +23,7 @@ FEATURE_COLUMNS = [
     "population_size",
 ]
 TARGET_COLUMN = "final_hawk"
+CLASSIFICATION_TARGET_COLUMN = "hawk_dominant"
 
 
 def load_dataset(path=RAW_DATA_PATH):
@@ -47,23 +48,36 @@ def split_dataset(dataset):
     dataset = dataset.drop_duplicates()
 
     X = dataset[FEATURE_COLUMNS]
-    y = dataset[TARGET_COLUMN]
+    y_regression = dataset[TARGET_COLUMN]
+    y_classification = dataset[CLASSIFICATION_TARGET_COLUMN]
 
-    X_train, X_temp, y_train, y_temp = train_test_split(
+    X_train, X_temp, y_train, y_temp, y_class_train, y_class_temp = train_test_split(
         X,
-        y,
+        y_regression,
+        y_classification,
         test_size=0.30,
         random_state=RANDOM_SEED,
     )
 
-    X_val, X_test, y_val, y_test = train_test_split(
+    X_val, X_test, y_val, y_test, y_class_val, y_class_test = train_test_split(
         X_temp,
         y_temp,
+        y_class_temp,
         test_size=0.50,
         random_state=RANDOM_SEED,
     )
 
-    return X_train, X_val, X_test, y_train, y_val, y_test
+    return (
+        X_train,
+        X_val,
+        X_test,
+        y_train,
+        y_val,
+        y_test,
+        y_class_train,
+        y_class_val,
+        y_class_test,
+    )
 
 
 def scale_features(X_train, X_val, X_test):
@@ -87,6 +101,9 @@ def save_processed_data(
     y_train,
     y_val,
     y_test,
+    y_class_train,
+    y_class_val,
+    y_class_test,
     scaler,
 ):
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -100,6 +117,10 @@ def save_processed_data(
     y_val.to_csv(PROCESSED_DATA_DIR / "y_val.csv", index=False)
     y_test.to_csv(PROCESSED_DATA_DIR / "y_test.csv", index=False)
 
+    y_class_train.to_csv(PROCESSED_DATA_DIR / "y_class_train.csv", index=False)
+    y_class_val.to_csv(PROCESSED_DATA_DIR / "y_class_val.csv", index=False)
+    y_class_test.to_csv(PROCESSED_DATA_DIR / "y_class_test.csv", index=False)
+
     dump(scaler, SCALER_PATH)
 
 
@@ -107,7 +128,17 @@ def main():
     dataset = load_dataset()
     print_dataset_report(dataset)
 
-    X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(dataset)
+    (
+        X_train,
+        X_val,
+        X_test,
+        y_train,
+        y_val,
+        y_test,
+        y_class_train,
+        y_class_val,
+        y_class_test,
+    ) = split_dataset(dataset)
 
     print("\nVeličina skupova:")
     print("Train:", X_train.shape)
@@ -127,6 +158,9 @@ def main():
         y_train,
         y_val,
         y_test,
+        y_class_train,
+        y_class_val,
+        y_class_test,
         scaler,
     )
 

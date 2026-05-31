@@ -1,0 +1,92 @@
+EDA izvestaj za Hawk-Dove dataset
+=================================
+
+Broj redova: 10000
+Broj kolona: 17
+
+Tipovi podataka
+---------------
+V                         float64
+C                         float64
+cost_value_ratio          float64
+value_cost_ratio          float64
+conflict_severity         float64
+theoretical_hawk          float64
+initial_hawk              float64
+initial_dove              float64
+iterations                  int64
+learning_rate             float64
+mutation_rate             float64
+environment_volatility    float64
+final_hawk                float64
+final_dove                float64
+hawk_dominant               int64
+dominant_strategy          object
+population_size             int64
+
+Nedostajuce vrednosti
+---------------------
+V                         0
+C                         0
+cost_value_ratio          0
+value_cost_ratio          0
+conflict_severity         0
+theoretical_hawk          0
+initial_hawk              0
+initial_dove              0
+iterations                0
+learning_rate             0
+mutation_rate             0
+environment_volatility    0
+final_hawk                0
+final_dove                0
+hawk_dominant             0
+dominant_strategy         0
+population_size           0
+
+Broj duplikata
+--------------
+0
+
+Deskriptivna statistika numerickih atributa
+-------------------------------------------
+                          count        mean         std         min         25%         50%         75%         max
+V                       10000.0   10.459835    5.504840    1.004753    5.741056   10.405461   15.277604   19.999331
+C                       10000.0   15.496627    8.314389    1.003622    8.344207   15.525187   22.598269   29.999508
+cost_value_ratio        10000.0    2.459679    3.089619    0.050991    0.809195    1.484249    2.715006   28.663156
+value_cost_ratio        10000.0    1.225536    1.810174    0.034888    0.368323    0.673742    1.235796   19.611474
+conflict_severity       10000.0    5.036792    9.907615  -18.921676   -2.164186    5.069280   12.160136   28.457811
+theoretical_hawk        10000.0    0.649639    0.318817    0.034888    0.368323    0.673742    1.000000    1.000000
+initial_hawk            10000.0    0.498228    0.287518    0.000068    0.249530    0.498679    0.742091    0.999989
+initial_dove            10000.0    0.501772    0.287518    0.000011    0.257909    0.501321    0.750470    0.999932
+iterations              10000.0  124.312900   43.113961   50.000000   88.000000  124.000000  162.000000  199.000000
+learning_rate           10000.0    0.090034    0.034589    0.030007    0.059897    0.090698    0.119553    0.149992
+mutation_rate           10000.0    0.015491    0.008359    0.001004    0.008326    0.015402    0.022738    0.029997
+environment_volatility  10000.0    0.065278    0.031734    0.010005    0.038329    0.065324    0.092797    0.119989
+population_size         10000.0  550.537300  259.388515  100.000000  327.000000  553.000000  774.000000  999.000000
+final_hawk              10000.0    0.620320    0.282939    0.000000    0.384289    0.645792    0.887053    1.000000
+final_dove              10000.0    0.379680    0.282939    0.000000    0.112947    0.354208    0.615711    1.000000
+
+Raspodela dominantne strategije
+-------------------------------
+dominant_strategy
+hawk    6423
+dove    3577
+
+Korelacija atributa sa ciljnom promenljivom final_hawk
+------------------------------------------------------
+final_hawk                1.000000
+final_dove               -1.000000
+theoretical_hawk          0.933328
+conflict_severity        -0.859754
+cost_value_ratio         -0.705373
+V                         0.682297
+C                        -0.572763
+value_cost_ratio          0.522855
+learning_rate             0.046568
+mutation_rate            -0.020281
+iterations               -0.010111
+environment_volatility   -0.009874
+initial_dove             -0.003327
+initial_hawk              0.003327
+population_size           0.002208

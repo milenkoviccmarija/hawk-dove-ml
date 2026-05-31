@@ -83,6 +83,8 @@ def get_feature_importance(model, feature_names):
 
 def save_feature_importance(feature_importance):
     if feature_importance is None:
+        (METRICS_DIR / "feature_importance.csv").unlink(missing_ok=True)
+        (FIGURES_DIR / "feature_importance.png").unlink(missing_ok=True)
         print("\nModel ne podržava feature importance ili koeficijente.")
         return
 

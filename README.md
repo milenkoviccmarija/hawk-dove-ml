@@ -24,7 +24,8 @@ hawk-dove-ml/
 │   ├── eda.py               # EDA i data wrangling izvestaji
 │   ├── preprocess.py        # podela podataka i skaliranje atributa
 │   ├── train.py             # treniranje, CV i izbor modela
-│   └── evaluate.py          # evaluacija najboljeg modela
+│   ├── evaluate.py          # evaluacija najboljeg modela
+│   └── predict.py           # primer koriscenja sacuvanog modela
 └── requirements.txt
 ```
 
@@ -48,6 +49,7 @@ python src/eda.py
 python src/preprocess.py
 python src/train.py
 python src/evaluate.py
+python src/predict.py
 ```
 
 ## Dataset
@@ -60,7 +62,6 @@ Najvazniji atributi:
 - `V` - vrednost resursa
 - `C` - cena konflikta
 - `initial_hawk` - pocetni udeo hawk strategije
-- `initial_dove` - pocetni udeo dove strategije
 - `iterations` - broj iteracija simulacije
 - `learning_rate` - brzina promene strategije
 - `mutation_rate` - stopa mutacije strategije
@@ -118,6 +119,7 @@ Podela je:
 
 U regresionom delu koriste se modeli koji su radjeni na vezbama:
 
+- Baseline Dummy Regressor
 - Linear Regression
 - Ridge Regression
 - Lasso Regression
@@ -148,7 +150,8 @@ Za regresiju se koriste metrike:
 - R2
 
 Modeli se porede na validation skupu, a najbolji model se zatim ocenjuje na test
-skupu. Rezultati se cuvaju u:
+skupu. Baseline model uvek predvidja srednju vrednost ciljne promenljive iz
+trening skupa i koristi se kao pocetna referentna tacka. Rezultati se cuvaju u:
 
 ```text
 results/metrics/model_results.csv
@@ -168,6 +171,12 @@ Nalaze se u:
 ```text
 results/figures/
 ```
+
+## Koriscenje sacuvanog modela
+
+Skripta `src/predict.py` ucitava sacuvani scaler i najbolji model, zatim pravi
+predikciju za jedan novi primer ulaznih parametara. Ovaj fajl pokazuje osnovni
+deployment tok bez UI-a ili API-ja.
 
 ## Klasifikacioni primer
 
@@ -193,10 +202,10 @@ KNN Regression (k=15)
 Test rezultati:
 
 ```text
-MAE: 0.0959
-MSE: 0.0154
-RMSE: 0.1241
-R2: 0.8101
+MAE: 0.0937
+MSE: 0.0149
+RMSE: 0.1222
+R2: 0.8159
 ```
 
 Klasifikacioni primer sa logistickom regresijom ima test accuracy oko `0.9173`,

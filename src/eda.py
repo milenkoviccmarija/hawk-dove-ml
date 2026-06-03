@@ -24,7 +24,6 @@ NUMERIC_COLUMNS = [
     "conflict_severity",
     "theoretical_hawk",
     "initial_hawk",
-    "initial_dove",
     "iterations",
     "learning_rate",
     "mutation_rate",

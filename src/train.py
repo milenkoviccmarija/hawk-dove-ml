@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.dummy import DummyRegressor
 
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import (
@@ -54,6 +55,7 @@ def load_processed_data():
 
 def build_models(best_ridge_alpha, best_lasso_alpha, knn_neighbors):
     return {
+        "Baseline Dummy Regressor": DummyRegressor(strategy="mean"),
         "Linear Regression": LinearRegression(),
         f"Ridge Regression (alpha={best_ridge_alpha})": Ridge(
             alpha=best_ridge_alpha,
@@ -246,6 +248,17 @@ def save_results(
     with open(METRICS_DIR / "results_summary.txt", "w") as file:
         file.write("Rezultati evaluacije regresionih modela\n")
         file.write("======================================\n\n")
+
+        file.write("Baseline model\n")
+        file.write("--------------\n")
+        file.write(
+            "Baseline Dummy Regressor uvek predvidja srednju vrednost "
+            "ciljne promenljive iz trening skupa.\n"
+        )
+        file.write(
+            "Ostali modeli treba da imaju bolji rezultat od ovog modela "
+            "da bi bili korisni.\n\n"
+        )
 
         file.write("Izbor broja suseda za KNN regresiju\n")
         file.write("-----------------------------------\n")

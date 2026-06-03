@@ -76,7 +76,6 @@ def generate_dataset(num_samples, random_seed=RANDOM_SEED):
             "conflict_severity": C - V,
             "theoretical_hawk": theoretical_hawk,
             "initial_hawk": initial_hawk,
-            "initial_dove": 1 - initial_hawk,
             "iterations": iterations,
             "learning_rate": learning_rate,
             "mutation_rate": mutation_rate,

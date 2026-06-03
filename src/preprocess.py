@@ -15,7 +15,6 @@ FEATURE_COLUMNS = [
     "V",
     "C",
     "initial_hawk",
-    "initial_dove",
     "iterations",
     "learning_rate",
     "mutation_rate",

@@ -70,13 +70,13 @@ def get_feature_importance(model, feature_names):
         return pd.DataFrame({
             "Feature": feature_names,
             "Importance": model.feature_importances_,
-        })
+        }).sort_values("Importance", ascending=False)
 
     if hasattr(model, "coef_"):
         return pd.DataFrame({
             "Feature": feature_names,
             "Importance": model.coef_,
-        })
+        }).sort_values("Importance", ascending=False)
 
     return None
 

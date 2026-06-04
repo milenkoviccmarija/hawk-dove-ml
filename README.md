@@ -117,27 +117,65 @@ Podela je:
 
 ## Modeli
 
-U regresionom delu koriste se modeli koji su radjeni na vezbama:
+U regresionom delu koriste se cetiri reprezentativna modela:
 
 - Baseline Dummy Regressor
-- Linear Regression
 - Ridge Regression
-- Lasso Regression
 - KNN Regression
+- Random Forest Regression
 
-Za Ridge i Lasso se bira regularizacioni parametar `alpha`, odnosno lambda.
-Za KNN regresiju se bira broj suseda `k`.
+Ovi modeli su izabrani zato sto pokrivaju razlicite pristupe:
 
-Parametri se biraju pomocu 5-fold unakrsne validacije na trening skupu. Za svaku
-kandidatsku vrednost racuna se prosecan `R2` skor, a bira se vrednost sa najboljim
-prosecnim rezultatom.
+- `DummyRegressor` sluzi kao baseline, odnosno najjednostavnija referenca
+- `Ridge Regression` predstavlja regularizovani linearni model
+- `KNN Regression` koristi slicnost izmedju scenarija evolucione igre
+- `Random Forest Regression` hvata nelinearne odnose i interakcije izmedju atributa
+
+Za Ridge se bira regularizacioni parametar `alpha`, za KNN broj suseda `k`, a za
+Random Forest parametri `n_estimators`, `max_depth` i `min_samples_leaf`.
+
+Hiperparametri se biraju pomocu 5-fold unakrsne validacije na trening skupu. Za
+svaku kandidatsku vrednost racuna se prosecan `R2` skor, a bira se vrednost sa
+najboljim prosecnim rezultatom.
 
 Trenutno izabrani parametri su:
 
 ```text
 Ridge alpha: 0.1
-Lasso alpha: 0.001
 KNN k: 15
+Random Forest n_estimators: 200
+Random Forest max_depth: 8
+Random Forest min_samples_leaf: 5
+```
+
+## Odabir znacajnih atributa
+
+Odabir najznacajnijih atributa radi se pomocu `feature_importances_` vrednosti iz
+tuniranog Random Forest modela. Atributi se rangiraju po vaznosti, zatim se modeli
+treniraju u dve varijante:
+
+- sa svim atributima
+- samo sa najznacajnijim atributima
+
+Najznacajniji atributi su:
+
+```text
+V
+C
+mutation_rate
+learning_rate
+```
+
+Ovakav rezultat je u skladu sa Hawk-Dove igrom: `V` i `C` direktno odredjuju
+isplativost agresivne strategije, dok `mutation_rate` i `learning_rate` uticu na
+dinamiku promene strategija kroz iteracije.
+
+Rezultati poredjenja cuvaju se u:
+
+```text
+results/metrics/feature_importance.csv
+results/metrics/feature_selection_results.csv
+results/metrics/model_results_selected_features.csv
 ```
 
 ## Evaluacija
@@ -157,6 +195,8 @@ trening skupa i koristi se kao pocetna referentna tacka. Rezultati se cuvaju u:
 results/metrics/model_results.csv
 results/metrics/regularization_results.csv
 results/metrics/knn_neighbor_results.csv
+results/metrics/random_forest_hyperparameter_results.csv
+results/metrics/feature_selection_results.csv
 results/metrics/results_summary.txt
 results/metrics/evaluation_summary.txt
 ```
@@ -165,6 +205,7 @@ Evaluacioni grafikoni:
 
 - stvarne vs predikovane vrednosti
 - residual plot
+- feature importance grafikon
 
 Nalaze se u:
 
@@ -196,16 +237,25 @@ Zbog toga je regresija glavni zadatak ovog projekta.
 Najbolji regresioni model je:
 
 ```text
-KNN Regression (k=15)
+Random Forest Regression
 ```
 
-Test rezultati:
+Test rezultati sa svim atributima:
 
 ```text
-MAE: 0.0937
-MSE: 0.0149
-RMSE: 0.1222
-R2: 0.8159
+MAE: 0.0739
+MSE: 0.0095
+RMSE: 0.0973
+R2: 0.8834
+```
+
+Test rezultati kada se koriste samo najznacajniji atributi:
+
+```text
+MAE: 0.0735
+MSE: 0.0094
+RMSE: 0.0967
+R2: 0.8847
 ```
 
 Klasifikacioni primer sa logistickom regresijom ima test accuracy oko `0.9173`,

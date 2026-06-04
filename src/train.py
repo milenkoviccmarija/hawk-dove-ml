@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from joblib import dump
+from itertools import product
 from pathlib import Path
 
 from sklearn.ensemble import RandomForestRegressor
@@ -79,7 +80,7 @@ MODEL_EXPLANATIONS = {
 }
 
 
-def build_models(best_ridge_alpha, knn_neighbors):
+def build_models(best_ridge_alpha, knn_neighbors, random_forest_params):
     return {
         "Baseline Dummy Regressor": DummyRegressor(strategy="mean"),
         f"Ridge Regression (alpha={best_ridge_alpha})": Ridge(
@@ -89,9 +90,7 @@ def build_models(best_ridge_alpha, knn_neighbors):
             n_neighbors=knn_neighbors,
         ),
         "Random Forest Regression": RandomForestRegressor(
-            n_estimators=200,
-            max_depth=12,
-            min_samples_leaf=3,
+            **random_forest_params,
             random_state=RANDOM_SEED,
             n_jobs=-1,
         ),
@@ -172,6 +171,76 @@ def evaluate_ridge_regularization_strengths(X_train, y_train):
     return results_df, best_ridge_alpha
 
 
+def evaluate_random_forest_hyperparameters(X_train, y_train):
+    kf = KFold(
+        n_splits=5,
+        shuffle=True,
+        random_state=RANDOM_SEED,
+    )
+    param_grid = {
+        "n_estimators": [100, 200],
+        "max_depth": [8, 12, 16],
+        "min_samples_leaf": [1, 3, 5],
+    }
+    results = []
+
+    for n_estimators, max_depth, min_samples_leaf in product(
+        param_grid["n_estimators"],
+        param_grid["max_depth"],
+        param_grid["min_samples_leaf"],
+    ):
+        params = {
+            "n_estimators": n_estimators,
+            "max_depth": max_depth,
+            "min_samples_leaf": min_samples_leaf,
+        }
+        model = RandomForestRegressor(
+            **params,
+            random_state=RANDOM_SEED,
+            n_jobs=-1,
+        )
+        cv_scores = cross_val_score(
+            model,
+            X_train,
+            y_train,
+            cv=kf,
+            scoring="r2",
+        )
+        results.append({
+            **params,
+            "CV_R2_mean": np.mean(cv_scores),
+            "CV_R2_std": np.std(cv_scores),
+        })
+
+    results_df = pd.DataFrame(results)
+    best_result = results_df.sort_values("CV_R2_mean", ascending=False).iloc[0]
+    best_params = {
+        "n_estimators": int(best_result["n_estimators"]),
+        "max_depth": int(best_result["max_depth"]),
+        "min_samples_leaf": int(best_result["min_samples_leaf"]),
+    }
+
+    return results_df, best_params
+
+
+def select_important_features(X_train, y_train, random_forest_params, top_n=4):
+    model = RandomForestRegressor(
+        **random_forest_params,
+        random_state=RANDOM_SEED,
+        n_jobs=-1,
+    )
+    model.fit(X_train, y_train)
+
+    feature_importance_df = pd.DataFrame({
+        "Feature": X_train.columns,
+        "Importance": model.feature_importances_,
+    }).sort_values("Importance", ascending=False)
+
+    selected_features = feature_importance_df.head(top_n)["Feature"].tolist()
+
+    return feature_importance_df, selected_features
+
+
 def evaluate_models(models, X_train, y_train, X_val, y_val):
     kf = KFold(
         n_splits=5,
@@ -242,25 +311,62 @@ def evaluate_classification_example(X_train, y_train, X_test, y_test):
     }
 
 
+def build_feature_selection_comparison(
+    all_features_results_df,
+    selected_features_results_df,
+):
+    all_features_results_df = all_features_results_df.copy()
+    selected_features_results_df = selected_features_results_df.copy()
+
+    all_features_results_df.insert(0, "feature_set", "all_features")
+    selected_features_results_df.insert(0, "feature_set", "selected_features")
+
+    return pd.concat(
+        [all_features_results_df, selected_features_results_df],
+        ignore_index=True,
+    )
+
+
 def save_results(
     results_df,
+    selected_features_results_df,
+    feature_selection_results_df,
     knn_results_df,
     regularization_results_df,
+    random_forest_results_df,
+    feature_importance_df,
     best_ridge_alpha,
     best_knn_neighbors,
+    best_random_forest_params,
+    selected_features,
     best_model_name,
+    selected_features_best_model_name,
     test_metrics,
+    selected_features_test_metrics,
     classification_metrics,
 ):
     METRICS_DIR.mkdir(parents=True, exist_ok=True)
     BEST_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     results_df.to_csv(METRICS_DIR / "model_results.csv", index=False)
+    selected_features_results_df.to_csv(
+        METRICS_DIR / "model_results_selected_features.csv",
+        index=False,
+    )
+    feature_selection_results_df.to_csv(
+        METRICS_DIR / "feature_selection_results.csv",
+        index=False,
+    )
     knn_results_df.to_csv(METRICS_DIR / "knn_neighbor_results.csv", index=False)
     regularization_results_df.to_csv(
         METRICS_DIR / "regularization_results.csv",
         index=False,
     )
+    random_forest_results_df.to_csv(
+        METRICS_DIR / "random_forest_hyperparameter_results.csv",
+        index=False,
+    )
+    feature_importance_df.to_csv(METRICS_DIR / "feature_importance.csv", index=False)
 
     with open(METRICS_DIR / "results_summary.txt", "w") as file:
         file.write("Rezultati evaluacije regresionih modela\n")
@@ -292,6 +398,46 @@ def save_results(
             file.write(f"Std CV R2: {result['CV_R2_std']}\n")
             file.write("\n")
 
+        file.write("Izbor hiperparametara za Random Forest regresiju\n")
+        file.write("-----------------------------------------------\n")
+        file.write(f"Najbolji parametri: {best_random_forest_params}\n\n")
+
+        for result in random_forest_results_df.to_dict("records"):
+            file.write(
+                "n_estimators = "
+                f"{int(result['n_estimators'])}, "
+                f"max_depth = {int(result['max_depth'])}, "
+                f"min_samples_leaf = {int(result['min_samples_leaf'])}\n"
+            )
+            file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
+            file.write(f"Std CV R2: {result['CV_R2_std']}\n")
+            file.write("\n")
+
+        file.write("Odabir najznacajnijih atributa\n")
+        file.write("------------------------------\n")
+        file.write(
+            "Atributi su rangirani pomocu feature_importances_ vrednosti "
+            "iz tuniranog Random Forest modela.\n"
+        )
+        file.write(f"Izabrani atributi: {', '.join(selected_features)}\n\n")
+
+        for result in feature_importance_df.to_dict("records"):
+            file.write(f"{result['Feature']}: {result['Importance']}\n")
+        file.write("\n")
+
+        file.write("Poredjenje modela sa svim i izabranim atributima\n")
+        file.write("-----------------------------------------------\n")
+        for result in feature_selection_results_df.to_dict("records"):
+            file.write(f"Skup atributa: {result['feature_set']}\n")
+            file.write(f"Model: {result['model']}\n")
+            file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
+            file.write(f"Std CV R2: {result['CV_R2_std']}\n")
+            file.write(f"Validation MAE: {result['Val_MAE']}\n")
+            file.write(f"Validation MSE: {result['Val_MSE']}\n")
+            file.write(f"Validation RMSE: {result['Val_RMSE']}\n")
+            file.write(f"Validation R2: {result['Val_R2']}\n")
+            file.write("\n")
+
         for result in results_df.to_dict("records"):
             file.write(f"Model: {result['model']}\n")
             file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
@@ -309,6 +455,16 @@ def save_results(
         file.write(f"Test MSE: {test_metrics['MSE']}\n")
         file.write(f"Test RMSE: {test_metrics['RMSE']}\n")
         file.write(f"Test R2: {test_metrics['R2']}\n")
+        file.write("\n")
+
+        file.write("Najbolji model sa izabranim atributima\n")
+        file.write("--------------------------------------\n")
+        file.write(f"Model: {selected_features_best_model_name}\n")
+        file.write(f"Atributi: {', '.join(selected_features)}\n")
+        file.write(f"Test MAE: {selected_features_test_metrics['MAE']}\n")
+        file.write(f"Test MSE: {selected_features_test_metrics['MSE']}\n")
+        file.write(f"Test RMSE: {selected_features_test_metrics['RMSE']}\n")
+        file.write(f"Test R2: {selected_features_test_metrics['R2']}\n")
         file.write("\n")
 
         file.write("Primer klasifikacije\n")
@@ -344,7 +500,22 @@ def main():
         regularization_results_df,
         best_ridge_alpha,
     ) = evaluate_ridge_regularization_strengths(X_train, y_train)
-    models = build_models(best_ridge_alpha, best_knn_neighbors)
+    (
+        random_forest_results_df,
+        best_random_forest_params,
+    ) = evaluate_random_forest_hyperparameters(X_train, y_train)
+    feature_importance_df, selected_features = select_important_features(
+        X_train,
+        y_train,
+        best_random_forest_params,
+        top_n=4,
+    )
+
+    models = build_models(
+        best_ridge_alpha,
+        best_knn_neighbors,
+        best_random_forest_params,
+    )
 
     results_df, best_model, best_model_name = evaluate_models(
         models,
@@ -353,8 +524,33 @@ def main():
         X_val,
         y_val,
     )
+    selected_features_models = build_models(
+        best_ridge_alpha,
+        best_knn_neighbors,
+        best_random_forest_params,
+    )
+    (
+        selected_features_results_df,
+        selected_features_best_model,
+        selected_features_best_model_name,
+    ) = evaluate_models(
+        selected_features_models,
+        X_train[selected_features],
+        y_train,
+        X_val[selected_features],
+        y_val,
+    )
+    feature_selection_results_df = build_feature_selection_comparison(
+        results_df,
+        selected_features_results_df,
+    )
 
     test_metrics = evaluate_best_model(best_model, X_test, y_test)
+    selected_features_test_metrics = evaluate_best_model(
+        selected_features_best_model,
+        X_test[selected_features],
+        y_test,
+    )
     classification_metrics = evaluate_classification_example(
         X_train,
         y_class_train,
@@ -363,23 +559,38 @@ def main():
     )
     save_results(
         results_df,
+        selected_features_results_df,
+        feature_selection_results_df,
         knn_results_df,
         regularization_results_df,
+        random_forest_results_df,
+        feature_importance_df,
         best_ridge_alpha,
         best_knn_neighbors,
+        best_random_forest_params,
+        selected_features,
         best_model_name,
+        selected_features_best_model_name,
         test_metrics,
+        selected_features_test_metrics,
         classification_metrics,
     )
     dump(best_model, BEST_MODEL_PATH)
 
     print(f"\nNajbolji alpha za Ridge regresiju: {best_ridge_alpha}")
     print(f"\nNajbolji broj suseda za KNN regresiju: {best_knn_neighbors}")
+    print(f"\nNajbolji parametri za Random Forest: {best_random_forest_params}")
+    print(f"\nIzabrani najznacajniji atributi: {', '.join(selected_features)}")
     print(f"\nNajbolji model: {best_model_name}")
     print("Test MAE:", test_metrics["MAE"])
     print("Test MSE:", test_metrics["MSE"])
     print("Test RMSE:", test_metrics["RMSE"])
     print("Test R2:", test_metrics["R2"])
+    print("\nNajbolji model sa izabranim atributima:", selected_features_best_model_name)
+    print("Selected features Test MAE:", selected_features_test_metrics["MAE"])
+    print("Selected features Test MSE:", selected_features_test_metrics["MSE"])
+    print("Selected features Test RMSE:", selected_features_test_metrics["RMSE"])
+    print("Selected features Test R2:", selected_features_test_metrics["R2"])
     print("\nPrimer klasifikacije za hawk_dominant:")
     print("Model:", classification_metrics["model"])
     print("Test accuracy:", classification_metrics["accuracy"])

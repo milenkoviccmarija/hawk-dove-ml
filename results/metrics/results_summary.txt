@@ -1,10 +1,15 @@
 Rezultati evaluacije regresionih modela
 ======================================
 
-Baseline model
---------------
-Baseline Dummy Regressor uvek predvidja srednju vrednost ciljne promenljive iz trening skupa.
-Ostali modeli treba da imaju bolji rezultat od ovog modela da bi bili korisni.
+Izabrani modeli i razlog izbora
+--------------------------------
+Baseline Dummy Regressor: Uzima se kao polazna tacka jer uvek predvidja srednju vrednost ciljne promenljive. Ako drugi modeli nisu bolji od njega, onda nisu naucili koristan obrazac iz atributa.
+
+Ridge Regression: Uzima se kao glavni linearni model jer je jednostavan za tumacenje, a L2 regularizacija smanjuje preprilagodjavanje i stabilizuje koeficijente kada su atributi povezani.
+
+KNN Regression: Uzima se jer koristi slicnost izmedju scenarija. Za ovaj problem je prirodno proveriti da li slicne kombinacije V, C, pocetnog udela i parametara simulacije daju slican final_hawk.
+
+Random Forest Regression: Uzima se kao nelinearni model jer simulacija hawk-dove dinamike ima interakcije izmedju atributa, na primer V/C, learning_rate, mutation_rate i volatilnost. Ansambl stabala dobro hvata takve nelinearne odnose bez potrebe da ih rucno zadamo.
 
 Izbor broja suseda za KNN regresiju
 -----------------------------------
@@ -46,10 +51,9 @@ k = 31
 Mean CV R2: 0.8099314809768678
 Std CV R2: 0.0027099456932607206
 
-Izbor lambda/alpha parametra za Ridge i Lasso
----------------------------------------------
+Izbor lambda/alpha parametra za Ridge regresiju
+-----------------------------------------------
 Najbolji alpha za Ridge: 0.1
-Najbolji alpha za Lasso: 0.001
 
 Model: Ridge Regression
 alpha = 0.0001
@@ -86,41 +90,6 @@ alpha = 100.0
 Mean CV R2: 0.8038307185716753
 Std CV R2: 0.0044047856749113495
 
-Model: Lasso Regression
-alpha = 0.0001
-Mean CV R2: 0.8041008228859926
-Std CV R2: 0.004266385885775072
-
-Model: Lasso Regression
-alpha = 0.001
-Mean CV R2: 0.8041336856097596
-Std CV R2: 0.004396140981575518
-
-Model: Lasso Regression
-alpha = 0.01
-Mean CV R2: 0.800276383863374
-Std CV R2: 0.004772190760906516
-
-Model: Lasso Regression
-alpha = 0.1
-Mean CV R2: 0.5454915721665908
-Std CV R2: 0.004812187392159702
-
-Model: Lasso Regression
-alpha = 1.0
-Mean CV R2: -0.0011810672041636216
-Std CV R2: 0.0008971375581118821
-
-Model: Lasso Regression
-alpha = 10.0
-Mean CV R2: -0.0011810672041636216
-Std CV R2: 0.0008971375581118821
-
-Model: Lasso Regression
-alpha = 100.0
-Mean CV R2: -0.0011810672041636216
-Std CV R2: 0.0008971375581118821
-
 Model: Baseline Dummy Regressor
 Mean CV R2: -0.0011810672041636216
 Std CV R2: 0.0008971375581118821
@@ -128,14 +97,6 @@ Validation MAE: 0.2503559908048837
 Validation MSE: 0.08216803713903054
 Validation RMSE: 0.2866496766770033
 Validation R2: -0.0018533645341345384
-
-Model: Linear Regression
-Mean CV R2: 0.8040849240924013
-Std CV R2: 0.004250888780947312
-Validation MAE: 0.0970726212828054
-Validation MSE: 0.015487921589225583
-Validation RMSE: 0.12445047846121599
-Validation R2: 0.811159826934262
 
 Model: Ridge Regression (alpha=0.1)
 Mean CV R2: 0.8040849266621256
@@ -145,14 +106,6 @@ Validation MSE: 0.01548795560916992
 Validation RMSE: 0.12445061514178996
 Validation R2: 0.8111594121379875
 
-Model: Lasso Regression (alpha=0.001)
-Mean CV R2: 0.8041336856097596
-Std CV R2: 0.004396140981575518
-Validation MAE: 0.09705166554890889
-Validation MSE: 0.015497069737258616
-Validation RMSE: 0.12448722720527844
-Validation R2: 0.8110482859603595
-
 Model: KNN Regression (k=15)
 Mean CV R2: 0.8177098515340475
 Std CV R2: 0.00557306380073357
@@ -161,13 +114,21 @@ Validation MSE: 0.014262293342612557
 Validation RMSE: 0.1194248439086799
 Validation R2: 0.8261035912651502
 
+Model: Random Forest Regression
+Mean CV R2: 0.8798176207424258
+Std CV R2: 0.003368437459801685
+Validation MAE: 0.07207348156826707
+Validation MSE: 0.00909563388754361
+Validation RMSE: 0.09537103274864758
+Validation R2: 0.8890993173247199
+
 Najbolji model
 --------------
-Model: KNN Regression (k=15)
-Test MAE: 0.09369136387284081
-Test MSE: 0.014943146059042331
-Test RMSE: 0.12224216154438014
-Test R2: 0.8158561028100533
+Model: Random Forest Regression
+Test MAE: 0.07402374115968499
+Test MSE: 0.00953741716079707
+Test RMSE: 0.09765970080231184
+Test R2: 0.8824707221507274
 
 Primer klasifikacije
 --------------------

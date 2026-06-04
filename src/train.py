@@ -3,7 +3,8 @@ import numpy as np
 from joblib import dump
 from pathlib import Path
 
-from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge, Lasso
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.dummy import DummyRegressor
 
@@ -53,18 +54,46 @@ def load_processed_data():
     )
 
 
-def build_models(best_ridge_alpha, best_lasso_alpha, knn_neighbors):
+MODEL_EXPLANATIONS = {
+    "Baseline Dummy Regressor": (
+        "Uzima se kao polazna tacka jer uvek predvidja srednju vrednost "
+        "ciljne promenljive. Ako drugi modeli nisu bolji od njega, onda "
+        "nisu naucili koristan obrazac iz atributa."
+    ),
+    "Ridge Regression": (
+        "Uzima se kao glavni linearni model jer je jednostavan za tumacenje, "
+        "a L2 regularizacija smanjuje preprilagodjavanje i stabilizuje "
+        "koeficijente kada su atributi povezani."
+    ),
+    "KNN Regression": (
+        "Uzima se jer koristi slicnost izmedju scenarija. Za ovaj problem je "
+        "prirodno proveriti da li slicne kombinacije V, C, pocetnog udela i "
+        "parametara simulacije daju slican final_hawk."
+    ),
+    "Random Forest Regression": (
+        "Uzima se kao nelinearni model jer simulacija hawk-dove dinamike ima "
+        "interakcije izmedju atributa, na primer V/C, learning_rate, "
+        "mutation_rate i volatilnost. Ansambl stabala dobro hvata takve "
+        "nelinearne odnose bez potrebe da ih rucno zadamo."
+    ),
+}
+
+
+def build_models(best_ridge_alpha, knn_neighbors):
     return {
         "Baseline Dummy Regressor": DummyRegressor(strategy="mean"),
-        "Linear Regression": LinearRegression(),
         f"Ridge Regression (alpha={best_ridge_alpha})": Ridge(
             alpha=best_ridge_alpha,
         ),
-        f"Lasso Regression (alpha={best_lasso_alpha})": Lasso(
-            alpha=best_lasso_alpha,
-        ),
         f"KNN Regression (k={knn_neighbors})": KNeighborsRegressor(
             n_neighbors=knn_neighbors,
+        ),
+        "Random Forest Regression": RandomForestRegressor(
+            n_estimators=200,
+            max_depth=12,
+            min_samples_leaf=3,
+            random_state=RANDOM_SEED,
+            n_jobs=-1,
         ),
     }
 
@@ -110,7 +139,7 @@ def evaluate_knn_neighbors(X_train, y_train):
     return results_df, best_neighbors
 
 
-def evaluate_regularization_strengths(X_train, y_train):
+def evaluate_ridge_regularization_strengths(X_train, y_train):
     kf = KFold(
         n_splits=5,
         shuffle=True,
@@ -119,39 +148,28 @@ def evaluate_regularization_strengths(X_train, y_train):
     alpha_candidates = [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
     results = []
 
-    for model_name, model_class in [
-        ("Ridge Regression", Ridge),
-        ("Lasso Regression", Lasso),
-    ]:
-        for alpha in alpha_candidates:
-            model = model_class(alpha=alpha)
-            cv_scores = cross_val_score(
-                model,
-                X_train,
-                y_train,
-                cv=kf,
-                scoring="r2",
-            )
-            results.append({
-                "model": model_name,
-                "alpha": alpha,
-                "CV_R2_mean": np.mean(cv_scores),
-                "CV_R2_std": np.std(cv_scores),
-            })
+    for alpha in alpha_candidates:
+        model = Ridge(alpha=alpha)
+        cv_scores = cross_val_score(
+            model,
+            X_train,
+            y_train,
+            cv=kf,
+            scoring="r2",
+        )
+        results.append({
+            "model": "Ridge Regression",
+            "alpha": alpha,
+            "CV_R2_mean": np.mean(cv_scores),
+            "CV_R2_std": np.std(cv_scores),
+        })
 
     results_df = pd.DataFrame(results)
     best_ridge_alpha = float(
-        results_df[results_df["model"] == "Ridge Regression"]
-        .sort_values("CV_R2_mean", ascending=False)
-        .iloc[0]["alpha"]
-    )
-    best_lasso_alpha = float(
-        results_df[results_df["model"] == "Lasso Regression"]
-        .sort_values("CV_R2_mean", ascending=False)
-        .iloc[0]["alpha"]
+        results_df.sort_values("CV_R2_mean", ascending=False).iloc[0]["alpha"]
     )
 
-    return results_df, best_ridge_alpha, best_lasso_alpha
+    return results_df, best_ridge_alpha
 
 
 def evaluate_models(models, X_train, y_train, X_val, y_val):
@@ -229,7 +247,6 @@ def save_results(
     knn_results_df,
     regularization_results_df,
     best_ridge_alpha,
-    best_lasso_alpha,
     best_knn_neighbors,
     best_model_name,
     test_metrics,
@@ -249,16 +266,10 @@ def save_results(
         file.write("Rezultati evaluacije regresionih modela\n")
         file.write("======================================\n\n")
 
-        file.write("Baseline model\n")
-        file.write("--------------\n")
-        file.write(
-            "Baseline Dummy Regressor uvek predvidja srednju vrednost "
-            "ciljne promenljive iz trening skupa.\n"
-        )
-        file.write(
-            "Ostali modeli treba da imaju bolji rezultat od ovog modela "
-            "da bi bili korisni.\n\n"
-        )
+        file.write("Izabrani modeli i razlog izbora\n")
+        file.write("--------------------------------\n")
+        for model_name, explanation in MODEL_EXPLANATIONS.items():
+            file.write(f"{model_name}: {explanation}\n\n")
 
         file.write("Izbor broja suseda za KNN regresiju\n")
         file.write("-----------------------------------\n")
@@ -270,10 +281,9 @@ def save_results(
             file.write(f"Std CV R2: {result['CV_R2_std']}\n")
             file.write("\n")
 
-        file.write("Izbor lambda/alpha parametra za Ridge i Lasso\n")
-        file.write("---------------------------------------------\n")
-        file.write(f"Najbolji alpha za Ridge: {best_ridge_alpha}\n")
-        file.write(f"Najbolji alpha za Lasso: {best_lasso_alpha}\n\n")
+        file.write("Izbor lambda/alpha parametra za Ridge regresiju\n")
+        file.write("-----------------------------------------------\n")
+        file.write(f"Najbolji alpha za Ridge: {best_ridge_alpha}\n\n")
 
         for result in regularization_results_df.to_dict("records"):
             file.write(f"Model: {result['model']}\n")
@@ -333,9 +343,8 @@ def main():
     (
         regularization_results_df,
         best_ridge_alpha,
-        best_lasso_alpha,
-    ) = evaluate_regularization_strengths(X_train, y_train)
-    models = build_models(best_ridge_alpha, best_lasso_alpha, best_knn_neighbors)
+    ) = evaluate_ridge_regularization_strengths(X_train, y_train)
+    models = build_models(best_ridge_alpha, best_knn_neighbors)
 
     results_df, best_model, best_model_name = evaluate_models(
         models,
@@ -357,7 +366,6 @@ def main():
         knn_results_df,
         regularization_results_df,
         best_ridge_alpha,
-        best_lasso_alpha,
         best_knn_neighbors,
         best_model_name,
         test_metrics,
@@ -366,7 +374,6 @@ def main():
     dump(best_model, BEST_MODEL_PATH)
 
     print(f"\nNajbolji alpha za Ridge regresiju: {best_ridge_alpha}")
-    print(f"Najbolji alpha za Lasso regresiju: {best_lasso_alpha}")
     print(f"\nNajbolji broj suseda za KNN regresiju: {best_knn_neighbors}")
     print(f"\nNajbolji model: {best_model_name}")
     print("Test MAE:", test_metrics["MAE"])

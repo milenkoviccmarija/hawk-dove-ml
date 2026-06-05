@@ -120,11 +120,11 @@ Std CV R2: 0.003470123312610623
 
 n_estimators = 100, max_depth = 16, min_samples_leaf = 1
 Mean CV R2: 0.8780511781130006
-Std CV R2: 0.003244197122270765
+Std CV R2: 0.003244197122270816
 
 n_estimators = 100, max_depth = 16, min_samples_leaf = 3
 Mean CV R2: 0.8791544086066072
-Std CV R2: 0.003423595808430291
+Std CV R2: 0.0034235958084302643
 
 n_estimators = 100, max_depth = 16, min_samples_leaf = 5
 Mean CV R2: 0.8805981393638739
@@ -132,15 +132,15 @@ Std CV R2: 0.0034314890898671764
 
 n_estimators = 200, max_depth = 8, min_samples_leaf = 1
 Mean CV R2: 0.8815771893910819
-Std CV R2: 0.0030106189014089926
+Std CV R2: 0.0030106189014089567
 
 n_estimators = 200, max_depth = 8, min_samples_leaf = 3
 Mean CV R2: 0.8818228743172412
-Std CV R2: 0.0030979260381639446
+Std CV R2: 0.0030979260381639533
 
 n_estimators = 200, max_depth = 8, min_samples_leaf = 5
 Mean CV R2: 0.882190978754301
-Std CV R2: 0.0033095802424091257
+Std CV R2: 0.003309580242409172
 
 n_estimators = 200, max_depth = 12, min_samples_leaf = 1
 Mean CV R2: 0.8791918617731529
@@ -156,11 +156,11 @@ Std CV R2: 0.0036093661094571405
 
 n_estimators = 200, max_depth = 16, min_samples_leaf = 1
 Mean CV R2: 0.8785315511705696
-Std CV R2: 0.0030235440608152855
+Std CV R2: 0.0030235440608152816
 
 n_estimators = 200, max_depth = 16, min_samples_leaf = 3
 Mean CV R2: 0.8796329513781009
-Std CV R2: 0.003479157824330132
+Std CV R2: 0.0034791578243301147
 
 n_estimators = 200, max_depth = 16, min_samples_leaf = 5
 Mean CV R2: 0.8808118199602866
@@ -212,10 +212,10 @@ Validation R2: 0.8261035912651502
 Skup atributa: all_features
 Model: Random Forest Regression
 Mean CV R2: 0.882190978754301
-Std CV R2: 0.0033095802424091257
-Validation MAE: 0.07210822417954442
-Validation MSE: 0.009109320651599143
-Validation RMSE: 0.09544276112728059
+Std CV R2: 0.0033095802424091335
+Validation MAE: 0.0721082241795444
+Validation MSE: 0.009109320651599145
+Validation RMSE: 0.0954427611272806
 Validation R2: 0.8889324381939039
 
 Skup atributa: selected_features
@@ -248,7 +248,7 @@ Validation R2: 0.879071392861346
 Skup atributa: selected_features
 Model: Random Forest Regression
 Mean CV R2: 0.8832024149757464
-Std CV R2: 0.0032304599332259923
+Std CV R2: 0.003230459933225982
 Validation MAE: 0.07220719633172729
 Validation MSE: 0.009127614852927313
 Validation RMSE: 0.09553855165809932
@@ -280,48 +280,26 @@ Validation R2: 0.8261035912651502
 
 Model: Random Forest Regression
 Mean CV R2: 0.882190978754301
-Std CV R2: 0.0033095802424091257
-Validation MAE: 0.07210822417954442
-Validation MSE: 0.009109320651599143
-Validation RMSE: 0.09544276112728059
+Std CV R2: 0.0033095802424091335
+Validation MAE: 0.0721082241795444
+Validation MSE: 0.009109320651599145
+Validation RMSE: 0.0954427611272806
 Validation R2: 0.8889324381939039
 
-Najbolji model
---------------
+Najbolji model prema validation skupu
+------------------------------------
 Model: Random Forest Regression
-Test MAE: 0.07387607072407719
-Test MSE: 0.009458713823722632
-Test RMSE: 0.09725591922203312
-Test R2: 0.8834405807838076
+Validation MAE: 0.0721082241795444
+Validation MSE: 0.009109320651599145
+Validation RMSE: 0.0954427611272806
+Validation R2: 0.8889324381939039
 
-Najbolji model sa izabranim atributima
---------------------------------------
+Najbolji model sa izabranim atributima prema validation skupu
+-------------------------------------------------------------
 Model: Random Forest Regression
 Atributi: V, C, mutation_rate, learning_rate
-Test MAE: 0.07348958489808836
-Test MSE: 0.009359574668411252
-Test RMSE: 0.09674489479249669
-Test R2: 0.8846622693325928
+Validation MAE: 0.07220719633172729
+Validation MSE: 0.009127614852927313
+Validation RMSE: 0.09553855165809932
+Validation R2: 0.8887093817866895
 
-Primer klasifikacije
---------------------
-Cilj: hawk_dominant, odnosno da li je final_hawk > 0.5
-Model: Logistic Regression
-Test accuracy: 0.9173333333333333
-Test precision: 0.9341692789968652
-Test recall: 0.9361256544502617
-Confusion matrix:
-[[482  63]
- [ 61 894]]
-
-Classification report:
-              precision    recall  f1-score   support
-
-           0       0.89      0.88      0.89       545
-           1       0.93      0.94      0.94       955
-
-    accuracy                           0.92      1500
-   macro avg       0.91      0.91      0.91      1500
-weighted avg       0.92      0.92      0.92      1500
-
-Napomena: klasifikacija daje samo klasu hawk/dove, dok regresija daje tacan udeo final_hawk.

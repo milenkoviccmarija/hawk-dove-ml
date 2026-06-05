@@ -93,8 +93,6 @@ def generate_dataset(num_samples, random_seed=RANDOM_SEED):
 def main():
     dataset = generate_dataset(10000)
 
-    print(dataset.head())
-
     RAW_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
     dataset.to_csv(RAW_DATA_PATH, index=False)
 

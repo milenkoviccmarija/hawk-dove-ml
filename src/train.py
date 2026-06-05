@@ -5,19 +5,14 @@ from itertools import product
 from pathlib import Path
 
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LogisticRegression, Ridge
+from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.dummy import DummyRegressor
 
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    confusion_matrix,
     mean_absolute_error,
     mean_squared_error,
-    precision_score,
-    recall_score,
     root_mean_squared_error,
     r2_score,
 )
@@ -32,26 +27,15 @@ RANDOM_SEED = 42
 def load_processed_data():
     X_train = pd.read_csv(PROCESSED_DATA_DIR / "X_train_scaled.csv")
     y_train = pd.read_csv(PROCESSED_DATA_DIR / "y_train.csv").squeeze()
-    y_class_train = pd.read_csv(PROCESSED_DATA_DIR / "y_class_train.csv").squeeze()
 
     X_val = pd.read_csv(PROCESSED_DATA_DIR / "X_val_scaled.csv")
     y_val = pd.read_csv(PROCESSED_DATA_DIR / "y_val.csv").squeeze()
-    y_class_val = pd.read_csv(PROCESSED_DATA_DIR / "y_class_val.csv").squeeze()
-
-    X_test = pd.read_csv(PROCESSED_DATA_DIR / "X_test_scaled.csv")
-    y_test = pd.read_csv(PROCESSED_DATA_DIR / "y_test.csv").squeeze()
-    y_class_test = pd.read_csv(PROCESSED_DATA_DIR / "y_class_test.csv").squeeze()
 
     return (
         X_train,
         X_val,
-        X_test,
         y_train,
         y_val,
-        y_test,
-        y_class_train,
-        y_class_val,
-        y_class_test,
     )
 
 
@@ -241,7 +225,7 @@ def select_important_features(X_train, y_train, random_forest_params, top_n=4):
     return feature_importance_df, selected_features
 
 
-def evaluate_models(models, X_train, y_train, X_val, y_val):
+def evaluate_models(models, X_train, y_train, X_val, y_val, verbose=True):
     kf = KFold(
         n_splits=5,
         shuffle=True,
@@ -276,39 +260,20 @@ def evaluate_models(models, X_train, y_train, X_val, y_val):
 
         fitted_models[model_name] = model
 
-        print(f"\n===== {model_name} =====")
-        print("Cross-validation R2 scores:", cv_scores)
-        print("Mean CV R2:", np.mean(cv_scores))
-        print("Std CV R2:", np.std(cv_scores))
-        print("Validation MAE:", val_metrics["MAE"])
-        print("Validation MSE:", val_metrics["MSE"])
-        print("Validation RMSE:", val_metrics["RMSE"])
-        print("Validation R2:", val_metrics["R2"])
+        if verbose:
+            print(f"\n===== {model_name} =====")
+            print("Cross-validation R2 scores:", cv_scores)
+            print("Mean CV R2:", np.mean(cv_scores))
+            print("Std CV R2:", np.std(cv_scores))
+            print("Validation MAE:", val_metrics["MAE"])
+            print("Validation MSE:", val_metrics["MSE"])
+            print("Validation RMSE:", val_metrics["RMSE"])
+            print("Validation R2:", val_metrics["R2"])
 
     results_df = pd.DataFrame(results)
     best_model_name = results_df.sort_values("Val_R2", ascending=False).iloc[0]["model"]
 
     return results_df, fitted_models[best_model_name], best_model_name
-
-
-def evaluate_best_model(best_model, X_test, y_test):
-    y_test_pred = best_model.predict(X_test)
-    return calculate_metrics(y_test, y_test_pred)
-
-
-def evaluate_classification_example(X_train, y_train, X_test, y_test):
-    classifier = LogisticRegression(random_state=RANDOM_SEED)
-    classifier.fit(X_train, y_train)
-    y_pred = classifier.predict(X_test)
-
-    return {
-        "model": "Logistic Regression",
-        "accuracy": accuracy_score(y_test, y_pred),
-        "precision": precision_score(y_test, y_pred),
-        "recall": recall_score(y_test, y_pred),
-        "confusion_matrix": confusion_matrix(y_test, y_pred),
-        "classification_report": classification_report(y_test, y_pred),
-    }
 
 
 def build_feature_selection_comparison(
@@ -341,9 +306,6 @@ def save_results(
     selected_features,
     best_model_name,
     selected_features_best_model_name,
-    test_metrics,
-    selected_features_test_metrics,
-    classification_metrics,
 ):
     METRICS_DIR.mkdir(parents=True, exist_ok=True)
     BEST_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -448,52 +410,39 @@ def save_results(
             file.write(f"Validation R2: {result['Val_R2']}\n")
             file.write("\n")
 
-        file.write("Najbolji model\n")
-        file.write("--------------\n")
+        best_model_result = results_df.loc[
+            results_df["model"] == best_model_name
+        ].iloc[0]
+        selected_features_best_model_result = selected_features_results_df.loc[
+            selected_features_results_df["model"] == selected_features_best_model_name
+        ].iloc[0]
+
+        file.write("Najbolji model prema validation skupu\n")
+        file.write("------------------------------------\n")
         file.write(f"Model: {best_model_name}\n")
-        file.write(f"Test MAE: {test_metrics['MAE']}\n")
-        file.write(f"Test MSE: {test_metrics['MSE']}\n")
-        file.write(f"Test RMSE: {test_metrics['RMSE']}\n")
-        file.write(f"Test R2: {test_metrics['R2']}\n")
+        file.write(f"Validation MAE: {best_model_result['Val_MAE']}\n")
+        file.write(f"Validation MSE: {best_model_result['Val_MSE']}\n")
+        file.write(f"Validation RMSE: {best_model_result['Val_RMSE']}\n")
+        file.write(f"Validation R2: {best_model_result['Val_R2']}\n")
         file.write("\n")
 
-        file.write("Najbolji model sa izabranim atributima\n")
-        file.write("--------------------------------------\n")
+        file.write("Najbolji model sa izabranim atributima prema validation skupu\n")
+        file.write("-------------------------------------------------------------\n")
         file.write(f"Model: {selected_features_best_model_name}\n")
         file.write(f"Atributi: {', '.join(selected_features)}\n")
-        file.write(f"Test MAE: {selected_features_test_metrics['MAE']}\n")
-        file.write(f"Test MSE: {selected_features_test_metrics['MSE']}\n")
-        file.write(f"Test RMSE: {selected_features_test_metrics['RMSE']}\n")
-        file.write(f"Test R2: {selected_features_test_metrics['R2']}\n")
+        file.write(f"Validation MAE: {selected_features_best_model_result['Val_MAE']}\n")
+        file.write(f"Validation MSE: {selected_features_best_model_result['Val_MSE']}\n")
+        file.write(f"Validation RMSE: {selected_features_best_model_result['Val_RMSE']}\n")
+        file.write(f"Validation R2: {selected_features_best_model_result['Val_R2']}\n")
         file.write("\n")
-
-        file.write("Primer klasifikacije\n")
-        file.write("--------------------\n")
-        file.write("Cilj: hawk_dominant, odnosno da li je final_hawk > 0.5\n")
-        file.write(f"Model: {classification_metrics['model']}\n")
-        file.write(f"Test accuracy: {classification_metrics['accuracy']}\n")
-        file.write(f"Test precision: {classification_metrics['precision']}\n")
-        file.write(f"Test recall: {classification_metrics['recall']}\n")
-        file.write("Confusion matrix:\n")
-        file.write(str(classification_metrics["confusion_matrix"]))
-        file.write("\n\n")
-        file.write("Classification report:\n")
-        file.write(classification_metrics["classification_report"])
-        file.write("\n")
-        file.write("Napomena: klasifikacija daje samo klasu hawk/dove, dok regresija daje tacan udeo final_hawk.\n")
 
 
 def main():
     (
         X_train,
         X_val,
-        X_test,
         y_train,
         y_val,
-        y_test,
-        y_class_train,
-        y_class_val,
-        y_class_test,
     ) = load_processed_data()
     knn_results_df, best_knn_neighbors = evaluate_knn_neighbors(X_train, y_train)
     (
@@ -531,7 +480,7 @@ def main():
     )
     (
         selected_features_results_df,
-        selected_features_best_model,
+        _,
         selected_features_best_model_name,
     ) = evaluate_models(
         selected_features_models,
@@ -539,24 +488,13 @@ def main():
         y_train,
         X_val[selected_features],
         y_val,
+        verbose=False,
     )
     feature_selection_results_df = build_feature_selection_comparison(
         results_df,
         selected_features_results_df,
     )
 
-    test_metrics = evaluate_best_model(best_model, X_test, y_test)
-    selected_features_test_metrics = evaluate_best_model(
-        selected_features_best_model,
-        X_test[selected_features],
-        y_test,
-    )
-    classification_metrics = evaluate_classification_example(
-        X_train,
-        y_class_train,
-        X_test,
-        y_class_test,
-    )
     save_results(
         results_df,
         selected_features_results_df,
@@ -571,9 +509,6 @@ def main():
         selected_features,
         best_model_name,
         selected_features_best_model_name,
-        test_metrics,
-        selected_features_test_metrics,
-        classification_metrics,
     )
     dump(best_model, BEST_MODEL_PATH)
 
@@ -581,20 +516,8 @@ def main():
     print(f"\nNajbolji broj suseda za KNN regresiju: {best_knn_neighbors}")
     print(f"\nNajbolji parametri za Random Forest: {best_random_forest_params}")
     print(f"\nIzabrani najznacajniji atributi: {', '.join(selected_features)}")
-    print(f"\nNajbolji model: {best_model_name}")
-    print("Test MAE:", test_metrics["MAE"])
-    print("Test MSE:", test_metrics["MSE"])
-    print("Test RMSE:", test_metrics["RMSE"])
-    print("Test R2:", test_metrics["R2"])
-    print("\nNajbolji model sa izabranim atributima:", selected_features_best_model_name)
-    print("Selected features Test MAE:", selected_features_test_metrics["MAE"])
-    print("Selected features Test MSE:", selected_features_test_metrics["MSE"])
-    print("Selected features Test RMSE:", selected_features_test_metrics["RMSE"])
-    print("Selected features Test R2:", selected_features_test_metrics["R2"])
-    print("\nPrimer klasifikacije za hawk_dominant:")
-    print("Model:", classification_metrics["model"])
-    print("Test accuracy:", classification_metrics["accuracy"])
-    print("Klasifikacija predvidja samo klasu, a regresija procenjuje tacan final_hawk.")
+    print(f"\nNajbolji model prema validation skupu: {best_model_name}")
+    print("\nNajbolji model sa izabranim atributima prema validation skupu:", selected_features_best_model_name)
     print(f"\nRezultati su sačuvani u {METRICS_DIR}.")
     print(f"Najbolji model je sačuvan u {BEST_MODEL_PATH}.")
 

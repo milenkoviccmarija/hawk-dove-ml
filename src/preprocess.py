@@ -29,20 +29,6 @@ def load_dataset(path=RAW_DATA_PATH):
     return pd.read_csv(path)
 
 
-def print_dataset_report(dataset):
-    print("Prvih 5 redova dataset-a:")
-    print(dataset.head())
-
-    print("\nInformacije o dataset-u:")
-    print(dataset.info())
-
-    print("\nProvera nedostajućih vrednosti:")
-    print(dataset.isnull().sum())
-
-    print("\nProvera duplikata:")
-    print("Broj duplikata:", dataset.duplicated().sum())
-
-
 def split_dataset(dataset):
     dataset = dataset.drop_duplicates()
 
@@ -125,7 +111,6 @@ def save_processed_data(
 
 def main():
     dataset = load_dataset()
-    print_dataset_report(dataset)
 
     (
         X_train,

@@ -1,3 +1,8 @@
+import os
+
+os.environ.setdefault("MPLCONFIGDIR", "/private/tmp/hawk-dove-ml-matplotlib")
+
+import matplotlib
 import pandas as pd
 import numpy as np
 from joblib import dump
@@ -9,7 +14,6 @@ from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.dummy import DummyRegressor
 
-from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
@@ -18,8 +22,12 @@ from sklearn.metrics import (
 )
 
 
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 PROCESSED_DATA_DIR = Path("data/processed")
 METRICS_DIR = Path("results/metrics")
+FIGURES_DIR = Path("results/figures")
 BEST_MODEL_PATH = Path("models/best_model.joblib")
 RANDOM_SEED = 42
 
@@ -90,77 +98,117 @@ def calculate_metrics(y_true, y_pred):
     }
 
 
-def evaluate_knn_neighbors(X_train, y_train):
-    kf = KFold(
-        n_splits=5,
-        shuffle=True,
-        random_state=RANDOM_SEED,
+def calculate_validation_metrics(model, X_train, y_train, X_val, y_val):
+    model.fit(X_train, y_train)
+    y_val_pred = model.predict(X_val)
+    return calculate_metrics(y_val, y_val_pred)
+
+
+def find_elbow_index(x_values, y_values):
+    points = np.column_stack([x_values, y_values]).astype(float)
+
+    if len(points) <= 2:
+        return int(np.argmin(y_values))
+
+    value_range = points.max(axis=0) - points.min(axis=0)
+    value_range[value_range == 0] = 1
+    normalized_points = (points - points.min(axis=0)) / value_range
+
+    first_point = normalized_points[0]
+    last_point = normalized_points[-1]
+    line = last_point - first_point
+    line_length = np.linalg.norm(line)
+
+    if line_length == 0:
+        return int(np.argmin(y_values))
+
+    vectors = first_point - normalized_points
+    distances = np.abs(
+        (line[0] * vectors[:, 1] - line[1] * vectors[:, 0]) / line_length
     )
+    return int(np.argmax(distances))
+
+
+def mark_elbow(results_df, sort_column):
+    sorted_results = results_df.sort_values(sort_column).reset_index(drop=True)
+    elbow_index = find_elbow_index(
+        sorted_results[sort_column].to_numpy(),
+        sorted_results["Val_RMSE"].to_numpy(),
+    )
+    sorted_results["is_elbow"] = False
+    sorted_results.loc[elbow_index, "is_elbow"] = True
+    return sorted_results
+
+
+def mark_best_validation_rmse(results_df, sort_column):
+    sorted_results = results_df.sort_values(sort_column).reset_index(drop=True)
+    best_index = sorted_results["Val_RMSE"].idxmin()
+    sorted_results["is_best"] = False
+    sorted_results.loc[best_index, "is_best"] = True
+    return sorted_results
+
+
+def evaluate_knn_neighbors(X_train, y_train, X_val, y_val):
     neighbor_candidates = [1, 3, 5, 7, 9, 11, 15, 21, 31]
     results = []
 
     for neighbors in neighbor_candidates:
         model = KNeighborsRegressor(n_neighbors=neighbors)
-        cv_scores = cross_val_score(
+        val_metrics = calculate_validation_metrics(
             model,
             X_train,
             y_train,
-            cv=kf,
-            scoring="r2",
+            X_val,
+            y_val,
         )
         results.append({
             "neighbors": neighbors,
-            "CV_R2_mean": np.mean(cv_scores),
-            "CV_R2_std": np.std(cv_scores),
+            "Val_MAE": val_metrics["MAE"],
+            "Val_MSE": val_metrics["MSE"],
+            "Val_RMSE": val_metrics["RMSE"],
+            "Val_R2": val_metrics["R2"],
         })
 
-    results_df = pd.DataFrame(results)
+    results_df = mark_elbow(pd.DataFrame(results), "neighbors")
     best_neighbors = int(
-        results_df.sort_values("CV_R2_mean", ascending=False).iloc[0]["neighbors"]
+        results_df.loc[results_df["is_elbow"]].iloc[0]["neighbors"]
     )
 
     return results_df, best_neighbors
 
 
-def evaluate_ridge_regularization_strengths(X_train, y_train):
-    kf = KFold(
-        n_splits=5,
-        shuffle=True,
-        random_state=RANDOM_SEED,
-    )
+def evaluate_ridge_regularization_strengths(X_train, y_train, X_val, y_val):
     alpha_candidates = [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
     results = []
 
     for alpha in alpha_candidates:
         model = Ridge(alpha=alpha)
-        cv_scores = cross_val_score(
+        val_metrics = calculate_validation_metrics(
             model,
             X_train,
             y_train,
-            cv=kf,
-            scoring="r2",
+            X_val,
+            y_val,
         )
         results.append({
             "model": "Ridge Regression",
             "alpha": alpha,
-            "CV_R2_mean": np.mean(cv_scores),
-            "CV_R2_std": np.std(cv_scores),
+            "log10_alpha": np.log10(alpha),
+            "Val_MAE": val_metrics["MAE"],
+            "Val_MSE": val_metrics["MSE"],
+            "Val_RMSE": val_metrics["RMSE"],
+            "Val_R2": val_metrics["R2"],
         })
 
-    results_df = pd.DataFrame(results)
+    results_df = mark_best_validation_rmse(pd.DataFrame(results), "log10_alpha")
     best_ridge_alpha = float(
-        results_df.sort_values("CV_R2_mean", ascending=False).iloc[0]["alpha"]
+        results_df.loc[results_df["is_best"]].iloc[0]["alpha"]
     )
 
     return results_df, best_ridge_alpha
 
 
-def evaluate_random_forest_hyperparameters(X_train, y_train):
-    kf = KFold(
-        n_splits=5,
-        shuffle=True,
-        random_state=RANDOM_SEED,
-    )
+def evaluate_random_forest_hyperparameters(X_train, y_train, X_val, y_val):
     param_grid = {
         "n_estimators": [100, 200],
         "max_depth": [8, 12, 16],
@@ -183,21 +231,26 @@ def evaluate_random_forest_hyperparameters(X_train, y_train):
             random_state=RANDOM_SEED,
             n_jobs=-1,
         )
-        cv_scores = cross_val_score(
+        val_metrics = calculate_validation_metrics(
             model,
             X_train,
             y_train,
-            cv=kf,
-            scoring="r2",
+            X_val,
+            y_val,
         )
         results.append({
             **params,
-            "CV_R2_mean": np.mean(cv_scores),
-            "CV_R2_std": np.std(cv_scores),
+            "complexity": n_estimators * max_depth / min_samples_leaf,
+            "Val_MAE": val_metrics["MAE"],
+            "Val_MSE": val_metrics["MSE"],
+            "Val_RMSE": val_metrics["RMSE"],
+            "Val_R2": val_metrics["R2"],
         })
 
-    results_df = pd.DataFrame(results)
-    best_result = results_df.sort_values("CV_R2_mean", ascending=False).iloc[0]
+    results_df = pd.DataFrame(results).sort_values("complexity").reset_index(drop=True)
+    results_df["candidate_rank"] = np.arange(1, len(results_df) + 1)
+    results_df = mark_best_validation_rmse(results_df, "candidate_rank")
+    best_result = results_df.loc[results_df["is_best"]].iloc[0]
     best_params = {
         "n_estimators": int(best_result["n_estimators"]),
         "max_depth": int(best_result["max_depth"]),
@@ -205,6 +258,70 @@ def evaluate_random_forest_hyperparameters(X_train, y_train):
     }
 
     return results_df, best_params
+
+
+def save_hyperparameter_elbow_plot(
+    knn_results_df,
+    regularization_results_df,
+    random_forest_results_df,
+):
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+
+    plot_specs = [
+        (
+            axes[0],
+            knn_results_df,
+            "neighbors",
+            "KNN: broj suseda",
+            "k",
+            "is_elbow",
+            "koleno",
+        ),
+        (
+            axes[1],
+            regularization_results_df,
+            "alpha",
+            "Ridge: regularizacija",
+            "alpha",
+            "is_best",
+            "najbolji RMSE",
+        ),
+        (
+            axes[2],
+            random_forest_results_df,
+            "candidate_rank",
+            "Random Forest: slozenost",
+            "kandidat sortiran po slozenosti",
+            "is_best",
+            "najbolji RMSE",
+        ),
+    ]
+
+    for ax, data, x_column, title, x_label, marker_column, marker_label in plot_specs:
+        data = data.sort_values(x_column)
+        selected = data.loc[data[marker_column]].iloc[0]
+
+        ax.plot(data[x_column], data["Val_RMSE"], marker="o")
+        ax.scatter(
+            selected[x_column],
+            selected["Val_RMSE"],
+            color="red",
+            zorder=3,
+            label=marker_label,
+        )
+        ax.set_title(title)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel("Validation RMSE")
+        ax.legend()
+
+        if x_column == "alpha":
+            ax.set_xscale("log")
+
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / "hyperparameter_elbow.png")
+    plt.close()
 
 
 def select_important_features(X_train, y_train, random_forest_params, top_n=4):
@@ -226,32 +343,16 @@ def select_important_features(X_train, y_train, random_forest_params, top_n=4):
 
 
 def evaluate_models(models, X_train, y_train, X_val, y_val, verbose=True):
-    kf = KFold(
-        n_splits=5,
-        shuffle=True,
-        random_state=RANDOM_SEED,
-    )
-
     results = []
     fitted_models = {}
 
     for model_name, model in models.items():
-        cv_scores = cross_val_score(
-            model,
-            X_train,
-            y_train,
-            cv=kf,
-            scoring="r2",
-        )
-
         model.fit(X_train, y_train)
         y_val_pred = model.predict(X_val)
         val_metrics = calculate_metrics(y_val, y_val_pred)
 
         results.append({
             "model": model_name,
-            "CV_R2_mean": np.mean(cv_scores),
-            "CV_R2_std": np.std(cv_scores),
             "Val_MAE": val_metrics["MAE"],
             "Val_MSE": val_metrics["MSE"],
             "Val_RMSE": val_metrics["RMSE"],
@@ -262,9 +363,6 @@ def evaluate_models(models, X_train, y_train, X_val, y_val, verbose=True):
 
         if verbose:
             print(f"\n===== {model_name} =====")
-            print("Cross-validation R2 scores:", cv_scores)
-            print("Mean CV R2:", np.mean(cv_scores))
-            print("Std CV R2:", np.std(cv_scores))
             print("Validation MAE:", val_metrics["MAE"])
             print("Validation MSE:", val_metrics["MSE"])
             print("Validation RMSE:", val_metrics["RMSE"])
@@ -308,6 +406,7 @@ def save_results(
     selected_features_best_model_name,
 ):
     METRICS_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     BEST_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     results_df.to_csv(METRICS_DIR / "model_results.csv", index=False)
@@ -341,28 +440,38 @@ def save_results(
 
         file.write("Izbor broja suseda za KNN regresiju\n")
         file.write("-----------------------------------\n")
-        file.write(f"Najbolji broj suseda prema CV R2: {best_knn_neighbors}\n\n")
+        file.write(
+            "Pretraga je radjena tako sto se svaki kandidat fituje na train skupu, "
+            "a ocenjuje na validation skupu. Koleno je tacka validation RMSE "
+            "krive najudaljenija od prave izmedju prve i poslednje tacke.\n"
+        )
+        file.write(f"Izabrani broj suseda na kolenu: {best_knn_neighbors}\n\n")
 
         for result in knn_results_df.to_dict("records"):
             file.write(f"k = {int(result['neighbors'])}\n")
-            file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
-            file.write(f"Std CV R2: {result['CV_R2_std']}\n")
+            file.write(f"Validation RMSE: {result['Val_RMSE']}\n")
+            file.write(f"Validation R2: {result['Val_R2']}\n")
+            file.write(f"Koleno: {bool(result['is_elbow'])}\n")
             file.write("\n")
 
         file.write("Izbor lambda/alpha parametra za Ridge regresiju\n")
         file.write("-----------------------------------------------\n")
-        file.write(f"Najbolji alpha za Ridge: {best_ridge_alpha}\n\n")
+        file.write(f"Izabrani alpha prema najmanjem validation RMSE: {best_ridge_alpha}\n\n")
 
         for result in regularization_results_df.to_dict("records"):
             file.write(f"Model: {result['model']}\n")
             file.write(f"alpha = {result['alpha']}\n")
-            file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
-            file.write(f"Std CV R2: {result['CV_R2_std']}\n")
+            file.write(f"Validation RMSE: {result['Val_RMSE']}\n")
+            file.write(f"Validation R2: {result['Val_R2']}\n")
+            file.write(f"Najbolji validation RMSE: {bool(result['is_best'])}\n")
             file.write("\n")
 
         file.write("Izbor hiperparametara za Random Forest regresiju\n")
         file.write("-----------------------------------------------\n")
-        file.write(f"Najbolji parametri: {best_random_forest_params}\n\n")
+        file.write(
+            "Parametri se biraju kao kombinacija sa najmanjim validation RMSE.\n"
+        )
+        file.write(f"Izabrani parametri: {best_random_forest_params}\n\n")
 
         for result in random_forest_results_df.to_dict("records"):
             file.write(
@@ -371,8 +480,10 @@ def save_results(
                 f"max_depth = {int(result['max_depth'])}, "
                 f"min_samples_leaf = {int(result['min_samples_leaf'])}\n"
             )
-            file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
-            file.write(f"Std CV R2: {result['CV_R2_std']}\n")
+            file.write(f"Slozenost: {result['complexity']}\n")
+            file.write(f"Validation RMSE: {result['Val_RMSE']}\n")
+            file.write(f"Validation R2: {result['Val_R2']}\n")
+            file.write(f"Najbolji validation RMSE: {bool(result['is_best'])}\n")
             file.write("\n")
 
         file.write("Odabir najznacajnijih atributa\n")
@@ -392,8 +503,6 @@ def save_results(
         for result in feature_selection_results_df.to_dict("records"):
             file.write(f"Skup atributa: {result['feature_set']}\n")
             file.write(f"Model: {result['model']}\n")
-            file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
-            file.write(f"Std CV R2: {result['CV_R2_std']}\n")
             file.write(f"Validation MAE: {result['Val_MAE']}\n")
             file.write(f"Validation MSE: {result['Val_MSE']}\n")
             file.write(f"Validation RMSE: {result['Val_RMSE']}\n")
@@ -402,8 +511,6 @@ def save_results(
 
         for result in results_df.to_dict("records"):
             file.write(f"Model: {result['model']}\n")
-            file.write(f"Mean CV R2: {result['CV_R2_mean']}\n")
-            file.write(f"Std CV R2: {result['CV_R2_std']}\n")
             file.write(f"Validation MAE: {result['Val_MAE']}\n")
             file.write(f"Validation MSE: {result['Val_MSE']}\n")
             file.write(f"Validation RMSE: {result['Val_RMSE']}\n")
@@ -444,15 +551,35 @@ def main():
         y_train,
         y_val,
     ) = load_processed_data()
-    knn_results_df, best_knn_neighbors = evaluate_knn_neighbors(X_train, y_train)
+    knn_results_df, best_knn_neighbors = evaluate_knn_neighbors(
+        X_train,
+        y_train,
+        X_val,
+        y_val,
+    )
     (
         regularization_results_df,
         best_ridge_alpha,
-    ) = evaluate_ridge_regularization_strengths(X_train, y_train)
+    ) = evaluate_ridge_regularization_strengths(
+        X_train,
+        y_train,
+        X_val,
+        y_val,
+    )
     (
         random_forest_results_df,
         best_random_forest_params,
-    ) = evaluate_random_forest_hyperparameters(X_train, y_train)
+    ) = evaluate_random_forest_hyperparameters(
+        X_train,
+        y_train,
+        X_val,
+        y_val,
+    )
+    save_hyperparameter_elbow_plot(
+        knn_results_df,
+        regularization_results_df,
+        random_forest_results_df,
+    )
     feature_importance_df, selected_features = select_important_features(
         X_train,
         y_train,

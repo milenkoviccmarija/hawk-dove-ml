@@ -21,6 +21,7 @@ EXPECTED_OUTPUTS = [
     Path("models/best_model.joblib"),
     Path("results/metrics/results_summary.txt"),
     Path("results/metrics/evaluation_summary.txt"),
+    Path("results/figures/hyperparameter_elbow.png"),
     Path("results/figures/actual_vs_predicted.png"),
     Path("results/figures/residual_plot.png"),
 ]
@@ -28,8 +29,8 @@ EXPECTED_OUTPUTS = [
 
 def print_data_flow_check():
     print("\nProvera podele podataka:", flush=True)
-    print("- train: koristi se za fitovanje modela i cross-validation tuning.", flush=True)
-    print("- validation: koristi se za poredjenje modela i izbor najboljeg modela.", flush=True)
+    print("- train: koristi se za fitovanje kandidatskih modela.", flush=True)
+    print("- validation: koristi se za izbor hiperparametara i najboljeg modela.", flush=True)
     print("- test: koristi se samo u evaluate.py za finalnu proveru generalizacije.", flush=True)
     print("- predict: koristi sacuvani model i scaler za novi scenario.", flush=True)
 

@@ -13,293 +13,323 @@ Random Forest Regression: Uzima se kao nelinearni model jer simulacija hawk-dove
 
 Izbor broja suseda za KNN regresiju
 -----------------------------------
-Najbolji broj suseda prema CV R2: 15
+Pretraga je radjena tako sto se svaki kandidat fituje na train skupu, a ocenjuje na validation skupu. Koleno je tacka validation RMSE krive najudaljenija od prave izmedju prve i poslednje tacke.
+Izabrani broj suseda na kolenu: 5
 
 k = 1
-Mean CV R2: 0.6235120975892638
-Std CV R2: 0.020109412548133115
+Validation RMSE: 0.17358361098801073
+Validation R2: 0.6326173134724784
+Koleno: False
 
 k = 3
-Mean CV R2: 0.7634197102798422
-Std CV R2: 0.0069162165592623484
+Validation RMSE: 0.13392534883137155
+Validation R2: 0.7813110592657647
+Koleno: False
 
 k = 5
-Mean CV R2: 0.7940359239442971
-Std CV R2: 0.003345039431977309
+Validation RMSE: 0.12623134930483265
+Validation R2: 0.8057165989489768
+Koleno: True
 
 k = 7
-Mean CV R2: 0.8055264963781046
-Std CV R2: 0.004606229561505493
+Validation RMSE: 0.12446407914134226
+Validation R2: 0.8111185495496658
+Koleno: False
 
 k = 9
-Mean CV R2: 0.8112244969405804
-Std CV R2: 0.004280531043858416
+Validation RMSE: 0.12187681931226883
+Validation R2: 0.8188895657631882
+Koleno: False
 
 k = 11
-Mean CV R2: 0.81515034262686
-Std CV R2: 0.004220967708920321
+Validation RMSE: 0.12093029686768493
+Validation R2: 0.8216917299360679
+Koleno: False
 
 k = 15
-Mean CV R2: 0.8177098515340475
-Std CV R2: 0.00557306380073357
+Validation RMSE: 0.1194248439086799
+Validation R2: 0.8261035912651502
+Koleno: False
 
 k = 21
-Mean CV R2: 0.815881181461777
-Std CV R2: 0.004276062735341485
+Validation RMSE: 0.12050744234245957
+Validation R2: 0.822936523651083
+Koleno: False
 
 k = 31
-Mean CV R2: 0.8099314809768678
-Std CV R2: 0.0027099456932607206
+Validation RMSE: 0.12131592158108642
+Validation R2: 0.8205527315376622
+Koleno: False
 
 Izbor lambda/alpha parametra za Ridge regresiju
 -----------------------------------------------
-Najbolji alpha za Ridge: 0.1
+Izabrani alpha prema najmanjem validation RMSE: 0.0001
 
 Model: Ridge Regression
 alpha = 0.0001
-Mean CV R2: 0.8040849240952372
-Std CV R2: 0.004250888939495401
+Validation RMSE: 0.12445047859784394
+Validation R2: 0.8111598265196257
+Najbolji validation RMSE: True
 
 Model: Ridge Regression
 alpha = 0.001
-Mean CV R2: 0.8040849241207368
-Std CV R2: 0.004250890366427708
+Validation RMSE: 0.12445047982750042
+Validation R2: 0.8111598227878836
+Najbolji validation RMSE: False
 
 Model: Ridge Regression
 alpha = 0.01
-Mean CV R2: 0.8040849243733579
-Std CV R2: 0.0042509046357117235
+Validation RMSE: 0.12445049212453436
+Validation R2: 0.811159785469037
+Najbolji validation RMSE: False
 
 Model: Ridge Regression
 alpha = 0.1
-Mean CV R2: 0.8040849266621256
-Std CV R2: 0.00425104732462425
+Validation RMSE: 0.12445061514178996
+Validation R2: 0.8111594121379875
+Najbolji validation RMSE: False
 
 Model: Ridge Regression
 alpha = 1.0
-Mean CV R2: 0.8040849258141577
-Std CV R2: 0.004252473820727809
+Validation RMSE: 0.12445185000452304
+Validation R2: 0.8111556645733635
+Najbolji validation RMSE: False
 
 Model: Ridge Regression
 alpha = 10.0
-Mean CV R2: 0.8040825523949694
-Std CV R2: 0.004266699230604189
+Validation RMSE: 0.12446466620612658
+Validation R2: 0.8111167677358245
+Najbolji validation RMSE: False
 
 Model: Ridge Regression
 alpha = 100.0
-Mean CV R2: 0.8038307185716753
-Std CV R2: 0.0044047856749113495
+Validation RMSE: 0.12463816458937292
+Validation R2: 0.8105898105349425
+Najbolji validation RMSE: False
 
 Izbor hiperparametara za Random Forest regresiju
 -----------------------------------------------
-Najbolji parametri: {'n_estimators': 200, 'max_depth': 8, 'min_samples_leaf': 5}
-
-n_estimators = 100, max_depth = 8, min_samples_leaf = 1
-Mean CV R2: 0.8813284602794289
-Std CV R2: 0.003174577325304986
-
-n_estimators = 100, max_depth = 8, min_samples_leaf = 3
-Mean CV R2: 0.8814892378672299
-Std CV R2: 0.0030227092371255477
+Parametri se biraju kao kombinacija sa najmanjim validation RMSE.
+Izabrani parametri: {'n_estimators': 200, 'max_depth': 8, 'min_samples_leaf': 3}
 
 n_estimators = 100, max_depth = 8, min_samples_leaf = 5
-Mean CV R2: 0.8820732892396972
-Std CV R2: 0.0032397262525101994
-
-n_estimators = 100, max_depth = 12, min_samples_leaf = 1
-Mean CV R2: 0.878859816989442
-Std CV R2: 0.0032896417301062288
-
-n_estimators = 100, max_depth = 12, min_samples_leaf = 3
-Mean CV R2: 0.8794282572108838
-Std CV R2: 0.0032321773162030673
+Slozenost: 160.0
+Validation RMSE: 0.09552979636477724
+Validation R2: 0.8887297785237688
+Najbolji validation RMSE: False
 
 n_estimators = 100, max_depth = 12, min_samples_leaf = 5
-Mean CV R2: 0.8807439286662726
-Std CV R2: 0.003470123312610623
+Slozenost: 240.0
+Validation RMSE: 0.09555563914762812
+Validation R2: 0.8886695685950086
+Najbolji validation RMSE: False
 
-n_estimators = 100, max_depth = 16, min_samples_leaf = 1
-Mean CV R2: 0.8780511781130006
-Std CV R2: 0.003244197122270816
-
-n_estimators = 100, max_depth = 16, min_samples_leaf = 3
-Mean CV R2: 0.8791544086066072
-Std CV R2: 0.0034235958084302643
+n_estimators = 100, max_depth = 8, min_samples_leaf = 3
+Slozenost: 266.6666666666667
+Validation RMSE: 0.09532794248219353
+Validation R2: 0.8891995083422737
+Najbolji validation RMSE: False
 
 n_estimators = 100, max_depth = 16, min_samples_leaf = 5
-Mean CV R2: 0.8805981393638739
-Std CV R2: 0.0034314890898671764
-
-n_estimators = 200, max_depth = 8, min_samples_leaf = 1
-Mean CV R2: 0.8815771893910819
-Std CV R2: 0.0030106189014089567
-
-n_estimators = 200, max_depth = 8, min_samples_leaf = 3
-Mean CV R2: 0.8818228743172412
-Std CV R2: 0.0030979260381639533
+Slozenost: 320.0
+Validation RMSE: 0.09562542057797706
+Validation R2: 0.8885069066427829
+Najbolji validation RMSE: False
 
 n_estimators = 200, max_depth = 8, min_samples_leaf = 5
-Mean CV R2: 0.882190978754301
-Std CV R2: 0.003309580242409172
+Slozenost: 320.0
+Validation RMSE: 0.0954427611272806
+Validation R2: 0.8889324381939039
+Najbolji validation RMSE: False
 
-n_estimators = 200, max_depth = 12, min_samples_leaf = 1
-Mean CV R2: 0.8791918617731529
-Std CV R2: 0.002907243211703156
-
-n_estimators = 200, max_depth = 12, min_samples_leaf = 3
-Mean CV R2: 0.8798176207424258
-Std CV R2: 0.003368437459801685
+n_estimators = 100, max_depth = 12, min_samples_leaf = 3
+Slozenost: 400.0
+Validation RMSE: 0.09534192027252208
+Validation R2: 0.8891670129469994
+Najbolji validation RMSE: False
 
 n_estimators = 200, max_depth = 12, min_samples_leaf = 5
-Mean CV R2: 0.880943685935411
-Std CV R2: 0.0036093661094571405
+Slozenost: 480.0
+Validation RMSE: 0.09554956029076188
+Validation R2: 0.8886837329130333
+Najbolji validation RMSE: False
 
-n_estimators = 200, max_depth = 16, min_samples_leaf = 1
-Mean CV R2: 0.8785315511705696
-Std CV R2: 0.0030235440608152816
+n_estimators = 100, max_depth = 16, min_samples_leaf = 3
+Slozenost: 533.3333333333334
+Validation RMSE: 0.0955899455468147
+Validation R2: 0.8885896145103186
+Najbolji validation RMSE: False
 
-n_estimators = 200, max_depth = 16, min_samples_leaf = 3
-Mean CV R2: 0.8796329513781009
-Std CV R2: 0.0034791578243301147
+n_estimators = 200, max_depth = 8, min_samples_leaf = 3
+Slozenost: 533.3333333333334
+Validation RMSE: 0.09526057270940093
+Validation R2: 0.889356061941918
+Najbolji validation RMSE: True
 
 n_estimators = 200, max_depth = 16, min_samples_leaf = 5
-Mean CV R2: 0.8808118199602866
-Std CV R2: 0.003622469318354119
+Slozenost: 640.0
+Validation RMSE: 0.09560282404000389
+Validation R2: 0.8885595926385594
+Najbolji validation RMSE: False
+
+n_estimators = 200, max_depth = 12, min_samples_leaf = 3
+Slozenost: 800.0
+Validation RMSE: 0.09537103274864758
+Validation R2: 0.8890993173247199
+Najbolji validation RMSE: False
+
+n_estimators = 100, max_depth = 8, min_samples_leaf = 1
+Slozenost: 800.0
+Validation RMSE: 0.09546052522167771
+Validation R2: 0.8888910898875306
+Najbolji validation RMSE: False
+
+n_estimators = 200, max_depth = 16, min_samples_leaf = 3
+Slozenost: 1066.6666666666667
+Validation RMSE: 0.09557740378541692
+Validation R2: 0.8886188475180307
+Najbolji validation RMSE: False
+
+n_estimators = 100, max_depth = 12, min_samples_leaf = 1
+Slozenost: 1200.0
+Validation RMSE: 0.09574742683548013
+Validation R2: 0.888222222240677
+Najbolji validation RMSE: False
+
+n_estimators = 100, max_depth = 16, min_samples_leaf = 1
+Slozenost: 1600.0
+Validation RMSE: 0.09583754492605925
+Validation R2: 0.8880117113013438
+Najbolji validation RMSE: False
+
+n_estimators = 200, max_depth = 8, min_samples_leaf = 1
+Slozenost: 1600.0
+Validation RMSE: 0.09528086678763069
+Validation R2: 0.8893089142952104
+Najbolji validation RMSE: False
+
+n_estimators = 200, max_depth = 12, min_samples_leaf = 1
+Slozenost: 2400.0
+Validation RMSE: 0.09546103455722565
+Validation R2: 0.8888899042274171
+Najbolji validation RMSE: False
+
+n_estimators = 200, max_depth = 16, min_samples_leaf = 1
+Slozenost: 3200.0
+Validation RMSE: 0.09572651903889627
+Validation R2: 0.8882710334088905
+Najbolji validation RMSE: False
 
 Odabir najznacajnijih atributa
 ------------------------------
 Atributi su rangirani pomocu feature_importances_ vrednosti iz tuniranog Random Forest modela.
 Izabrani atributi: V, C, mutation_rate, learning_rate
 
-V: 0.5533824223243767
-C: 0.4146357218517192
-mutation_rate: 0.010148582310543417
-learning_rate: 0.00958390744379161
-iterations: 0.0032464601819258677
-environment_volatility: 0.0030940052891965664
-population_size: 0.0030915821764940826
-initial_hawk: 0.0028173184219525537
+V: 0.5520577509320441
+C: 0.41361007231135205
+mutation_rate: 0.010427457196698395
+learning_rate: 0.010264660402687904
+population_size: 0.0035570012219840303
+iterations: 0.003518913967765616
+environment_volatility: 0.0034536267559015224
+initial_hawk: 0.003110517211566546
 
 Poredjenje modela sa svim i izabranim atributima
 -----------------------------------------------
 Skup atributa: all_features
 Model: Baseline Dummy Regressor
-Mean CV R2: -0.0011810672041636216
-Std CV R2: 0.0008971375581118821
 Validation MAE: 0.2503559908048837
 Validation MSE: 0.08216803713903054
 Validation RMSE: 0.2866496766770033
 Validation R2: -0.0018533645341345384
 
 Skup atributa: all_features
-Model: Ridge Regression (alpha=0.1)
-Mean CV R2: 0.8040849266621256
-Std CV R2: 0.00425104732462425
-Validation MAE: 0.09707267247305011
-Validation MSE: 0.01548795560916992
-Validation RMSE: 0.12445061514178996
-Validation R2: 0.8111594121379875
+Model: Ridge Regression (alpha=0.0001)
+Validation MAE: 0.09707262133399651
+Validation MSE: 0.015487921623232415
+Validation RMSE: 0.12445047859784394
+Validation R2: 0.8111598265196257
 
 Skup atributa: all_features
-Model: KNN Regression (k=15)
-Mean CV R2: 0.8177098515340475
-Std CV R2: 0.00557306380073357
-Validation MAE: 0.09022965315185365
-Validation MSE: 0.014262293342612557
-Validation RMSE: 0.1194248439086799
-Validation R2: 0.8261035912651502
+Model: KNN Regression (k=5)
+Validation MAE: 0.09375698744415703
+Validation MSE: 0.01593435354731868
+Validation RMSE: 0.12623134930483265
+Validation R2: 0.8057165989489768
 
 Skup atributa: all_features
 Model: Random Forest Regression
-Mean CV R2: 0.882190978754301
-Std CV R2: 0.0033095802424091335
-Validation MAE: 0.0721082241795444
-Validation MSE: 0.009109320651599145
-Validation RMSE: 0.0954427611272806
-Validation R2: 0.8889324381939039
+Validation MAE: 0.07206513068503659
+Validation MSE: 0.009074576712923062
+Validation RMSE: 0.09526057270940093
+Validation R2: 0.889356061941918
 
 Skup atributa: selected_features
 Model: Baseline Dummy Regressor
-Mean CV R2: -0.0011810672041636216
-Std CV R2: 0.0008971375581118821
 Validation MAE: 0.2503559908048837
 Validation MSE: 0.08216803713903054
 Validation RMSE: 0.2866496766770033
 Validation R2: -0.0018533645341345384
 
 Skup atributa: selected_features
-Model: Ridge Regression (alpha=0.1)
-Mean CV R2: 0.8042095992148605
-Std CV R2: 0.004318388039611865
-Validation MAE: 0.09709106272752441
-Validation MSE: 0.015496196472381391
-Validation RMSE: 0.12448371970816663
-Validation R2: 0.8110589334503792
+Model: Ridge Regression (alpha=0.0001)
+Validation MAE: 0.09709102689388678
+Validation MSE: 0.015496163888275339
+Validation RMSE: 0.12448358883111998
+Validation R2: 0.8110593307398535
 
 Skup atributa: selected_features
-Model: KNN Regression (k=15)
-Mean CV R2: 0.8754500525854214
-Std CV R2: 0.0022388792632556066
-Validation MAE: 0.07519631938297404
-Validation MSE: 0.00991808445656182
-Validation RMSE: 0.09958958006017407
-Validation R2: 0.879071392861346
+Model: KNN Regression (k=5)
+Validation MAE: 0.07956279898732564
+Validation MSE: 0.011023583533419578
+Validation RMSE: 0.10499325470438364
+Validation R2: 0.8655923320464293
 
 Skup atributa: selected_features
 Model: Random Forest Regression
-Mean CV R2: 0.8832024149757464
-Std CV R2: 0.003230459933225982
-Validation MAE: 0.07220719633172729
-Validation MSE: 0.009127614852927313
-Validation RMSE: 0.09553855165809932
-Validation R2: 0.8887093817866895
+Validation MAE: 0.07216423032791687
+Validation MSE: 0.009093068796454606
+Validation RMSE: 0.0953575838434186
+Validation R2: 0.8891305928088051
 
 Model: Baseline Dummy Regressor
-Mean CV R2: -0.0011810672041636216
-Std CV R2: 0.0008971375581118821
 Validation MAE: 0.2503559908048837
 Validation MSE: 0.08216803713903054
 Validation RMSE: 0.2866496766770033
 Validation R2: -0.0018533645341345384
 
-Model: Ridge Regression (alpha=0.1)
-Mean CV R2: 0.8040849266621256
-Std CV R2: 0.00425104732462425
-Validation MAE: 0.09707267247305011
-Validation MSE: 0.01548795560916992
-Validation RMSE: 0.12445061514178996
-Validation R2: 0.8111594121379875
+Model: Ridge Regression (alpha=0.0001)
+Validation MAE: 0.09707262133399651
+Validation MSE: 0.015487921623232415
+Validation RMSE: 0.12445047859784394
+Validation R2: 0.8111598265196257
 
-Model: KNN Regression (k=15)
-Mean CV R2: 0.8177098515340475
-Std CV R2: 0.00557306380073357
-Validation MAE: 0.09022965315185365
-Validation MSE: 0.014262293342612557
-Validation RMSE: 0.1194248439086799
-Validation R2: 0.8261035912651502
+Model: KNN Regression (k=5)
+Validation MAE: 0.09375698744415703
+Validation MSE: 0.01593435354731868
+Validation RMSE: 0.12623134930483265
+Validation R2: 0.8057165989489768
 
 Model: Random Forest Regression
-Mean CV R2: 0.882190978754301
-Std CV R2: 0.0033095802424091335
-Validation MAE: 0.0721082241795444
-Validation MSE: 0.009109320651599145
-Validation RMSE: 0.0954427611272806
-Validation R2: 0.8889324381939039
+Validation MAE: 0.07206513068503659
+Validation MSE: 0.009074576712923062
+Validation RMSE: 0.09526057270940093
+Validation R2: 0.889356061941918
 
 Najbolji model prema validation skupu
 ------------------------------------
 Model: Random Forest Regression
-Validation MAE: 0.0721082241795444
-Validation MSE: 0.009109320651599145
-Validation RMSE: 0.0954427611272806
-Validation R2: 0.8889324381939039
+Validation MAE: 0.07206513068503659
+Validation MSE: 0.009074576712923062
+Validation RMSE: 0.09526057270940093
+Validation R2: 0.889356061941918
 
 Najbolji model sa izabranim atributima prema validation skupu
 -------------------------------------------------------------
 Model: Random Forest Regression
 Atributi: V, C, mutation_rate, learning_rate
-Validation MAE: 0.07220719633172729
-Validation MSE: 0.009127614852927313
-Validation RMSE: 0.09553855165809932
-Validation R2: 0.8887093817866895
+Validation MAE: 0.07216423032791687
+Validation MSE: 0.009093068796454606
+Validation RMSE: 0.0953575838434186
+Validation R2: 0.8891305928088051
 

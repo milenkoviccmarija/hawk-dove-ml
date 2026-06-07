@@ -134,18 +134,19 @@ Ovi modeli su izabrani zato sto pokrivaju razlicite pristupe:
 Za Ridge se bira regularizacioni parametar `alpha`, za KNN broj suseda `k`, a za
 Random Forest parametri `n_estimators`, `max_depth` i `min_samples_leaf`.
 
-Hiperparametri se biraju pomocu 5-fold unakrsne validacije na trening skupu. Za
-svaku kandidatsku vrednost racuna se prosecan `R2` skor, a bira se vrednost sa
-najboljim prosecnim rezultatom.
+Hiperparametri se biraju na validation skupu. Svaki kandidat se fituje na
+trening skupu, zatim se meri validation `RMSE` i `R2`. Za KNN se broj suseda
+bira preko kolena validation krive, dok se Ridge `alpha` i Random Forest
+kombinacija hiperparametara biraju prema najmanjem validation `RMSE`.
 
 Trenutno izabrani parametri su:
 
 ```text
-Ridge alpha: 0.1
-KNN k: 15
+Ridge alpha: 0.0001
+KNN k: 5
 Random Forest n_estimators: 200
 Random Forest max_depth: 8
-Random Forest min_samples_leaf: 5
+Random Forest min_samples_leaf: 3
 ```
 
 ## Odabir znacajnih atributa
@@ -199,6 +200,7 @@ results/metrics/random_forest_hyperparameter_results.csv
 results/metrics/feature_selection_results.csv
 results/metrics/results_summary.txt
 results/metrics/evaluation_summary.txt
+results/figures/hyperparameter_elbow.png
 ```
 
 Evaluacioni grafikoni:
@@ -206,6 +208,7 @@ Evaluacioni grafikoni:
 - stvarne vs predikovane vrednosti
 - residual plot
 - feature importance grafikon
+- validation grafikon za izbor hiperparametara
 
 Nalaze se u:
 

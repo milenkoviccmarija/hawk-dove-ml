@@ -120,7 +120,7 @@ Najbolji validation RMSE: False
 
 n_estimators = 100, max_depth = 12, min_samples_leaf = 5
 Slozenost: 240.0
-Validation RMSE: 0.09555563914762812
+Validation RMSE: 0.0955556391476281
 Validation R2: 0.8886695685950086
 Najbolji validation RMSE: False
 
@@ -132,13 +132,13 @@ Najbolji validation RMSE: False
 
 n_estimators = 100, max_depth = 16, min_samples_leaf = 5
 Slozenost: 320.0
-Validation RMSE: 0.09562542057797706
+Validation RMSE: 0.09562542057797707
 Validation R2: 0.8885069066427829
 Najbolji validation RMSE: False
 
 n_estimators = 200, max_depth = 8, min_samples_leaf = 5
 Slozenost: 320.0
-Validation RMSE: 0.0954427611272806
+Validation RMSE: 0.09544276112728059
 Validation R2: 0.8889324381939039
 Najbolji validation RMSE: False
 
@@ -150,7 +150,7 @@ Najbolji validation RMSE: False
 
 n_estimators = 200, max_depth = 12, min_samples_leaf = 5
 Slozenost: 480.0
-Validation RMSE: 0.09554956029076188
+Validation RMSE: 0.09554956029076186
 Validation R2: 0.8886837329130333
 Najbolji validation RMSE: False
 
@@ -204,7 +204,7 @@ Najbolji validation RMSE: False
 
 n_estimators = 200, max_depth = 8, min_samples_leaf = 1
 Slozenost: 1600.0
-Validation RMSE: 0.09528086678763069
+Validation RMSE: 0.0952808667876307
 Validation R2: 0.8893089142952104
 Najbolji validation RMSE: False
 
@@ -216,7 +216,7 @@ Najbolji validation RMSE: False
 
 n_estimators = 200, max_depth = 16, min_samples_leaf = 1
 Slozenost: 3200.0
-Validation RMSE: 0.09572651903889627
+Validation RMSE: 0.09572651903889628
 Validation R2: 0.8882710334088905
 Najbolji validation RMSE: False
 
@@ -260,9 +260,9 @@ Validation R2: 0.8057165989489768
 Skup atributa: all_features
 Model: Random Forest Regression
 Validation MAE: 0.07206513068503659
-Validation MSE: 0.009074576712923062
+Validation MSE: 0.00907457671292306
 Validation RMSE: 0.09526057270940093
-Validation R2: 0.889356061941918
+Validation R2: 0.8893560619419181
 
 Skup atributa: selected_features
 Model: Baseline Dummy Regressor
@@ -287,7 +287,7 @@ Validation R2: 0.8655923320464293
 
 Skup atributa: selected_features
 Model: Random Forest Regression
-Validation MAE: 0.07216423032791687
+Validation MAE: 0.07216423032791688
 Validation MSE: 0.009093068796454606
 Validation RMSE: 0.0953575838434186
 Validation R2: 0.8891305928088051
@@ -312,23 +312,23 @@ Validation R2: 0.8057165989489768
 
 Model: Random Forest Regression
 Validation MAE: 0.07206513068503659
-Validation MSE: 0.009074576712923062
+Validation MSE: 0.00907457671292306
 Validation RMSE: 0.09526057270940093
-Validation R2: 0.889356061941918
+Validation R2: 0.8893560619419181
 
 Najbolji model prema validation skupu
 ------------------------------------
 Model: Random Forest Regression
 Validation MAE: 0.07206513068503659
-Validation MSE: 0.009074576712923062
+Validation MSE: 0.00907457671292306
 Validation RMSE: 0.09526057270940093
-Validation R2: 0.889356061941918
+Validation R2: 0.8893560619419181
 
 Najbolji model sa izabranim atributima prema validation skupu
 -------------------------------------------------------------
 Model: Random Forest Regression
 Atributi: V, C, mutation_rate, learning_rate
-Validation MAE: 0.07216423032791687
+Validation MAE: 0.07216423032791688
 Validation MSE: 0.009093068796454606
 Validation RMSE: 0.0953575838434186
 Validation R2: 0.8891305928088051

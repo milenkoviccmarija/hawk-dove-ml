@@ -14,7 +14,7 @@
   ],
   "model_file": "best_model.joblib",
   "scaler_file": "standard_scaler.joblib",
-  "created_at_utc": "2026-06-10T09:00:10.068823+00:00",
+  "created_at_utc": "2026-06-11T12:34:42.754719+00:00",
   "prediction_output": {
     "final_hawk": "Predikovani finalni udeo hawk strategije.",
     "final_dove": "1 - final_hawk.",

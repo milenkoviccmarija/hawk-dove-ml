@@ -3,6 +3,7 @@ import os
 os.environ.setdefault("MPLCONFIGDIR", "/private/tmp/hawk-dove-ml-matplotlib")
 
 import matplotlib
+import numpy as np
 import pandas as pd
 from joblib import load
 from pathlib import Path
@@ -23,6 +24,10 @@ FIGURES_DIR = Path("results/figures")
 METRICS_DIR = Path("results/metrics")
 BEST_MODEL_PATH = Path("models/best_model.joblib")
 
+PLOT_COLOR = "#1f77b4"
+REFERENCE_COLOR = "#c43c39"
+GRID_COLOR = "#d9dee7"
+
 
 def load_test_data():
     X_test = pd.read_csv(PROCESSED_DATA_DIR / "X_test_scaled.csv")
@@ -40,12 +45,40 @@ def calculate_metrics(y_true, y_pred):
     }
 
 
-def save_actual_vs_predicted_plot(y_test, y_pred):
-    plt.figure(figsize=(8, 6))
-    plt.scatter(y_test, y_pred)
-    plt.xlabel("Stvarne vrednosti")
-    plt.ylabel("Predikovane vrednosti")
-    plt.title("Stvarne vs Predikovane vrednosti")
+def save_actual_vs_predicted_plot(y_test, y_pred, metrics):
+    min_value = min(y_test.min(), y_pred.min())
+    max_value = max(y_test.max(), y_pred.max())
+
+    plt.figure(figsize=(8, 7))
+    plt.scatter(
+        y_test,
+        y_pred,
+        s=28,
+        alpha=0.45,
+        color=PLOT_COLOR,
+        edgecolors="none",
+        label="Test instance",
+    )
+    plt.plot(
+        [min_value, max_value],
+        [min_value, max_value],
+        color=REFERENCE_COLOR,
+        linewidth=2,
+        label="Idealna predikcija",
+    )
+    plt.xlabel("Stvarni final_hawk")
+    plt.ylabel("Predikovani final_hawk")
+    plt.title("Stvarne i predikovane vrednosti")
+    plt.grid(True, color=GRID_COLOR, linewidth=0.8, alpha=0.8)
+    plt.legend()
+    plt.text(
+        0.04,
+        0.96,
+        f"R2 = {metrics['R2']:.3f}\nRMSE = {metrics['RMSE']:.3f}\nMAE = {metrics['MAE']:.3f}",
+        transform=plt.gca().transAxes,
+        va="top",
+        bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "edgecolor": GRID_COLOR},
+    )
     plt.tight_layout()
     plt.savefig(FIGURES_DIR / "actual_vs_predicted.png")
     plt.close()
@@ -55,13 +88,53 @@ def save_residual_plot(y_test, y_pred):
     residuals = y_test - y_pred
 
     plt.figure(figsize=(8, 6))
-    plt.scatter(y_pred, residuals)
-    plt.axhline(y=0)
-    plt.xlabel("Predikovane vrednosti")
-    plt.ylabel("Reziduali")
-    plt.title("Residual plot")
+    plt.scatter(
+        y_pred,
+        residuals,
+        s=28,
+        alpha=0.45,
+        color=PLOT_COLOR,
+        edgecolors="none",
+    )
+    plt.axhline(y=0, color=REFERENCE_COLOR, linewidth=2)
+    plt.xlabel("Predikovani final_hawk")
+    plt.ylabel("Rezidual (stvarno - predikovano)")
+    plt.title("Reziduali po predikovanoj vrednosti")
+    plt.grid(True, color=GRID_COLOR, linewidth=0.8, alpha=0.8)
     plt.tight_layout()
     plt.savefig(FIGURES_DIR / "residual_plot.png")
+    plt.close()
+
+
+def save_residual_distribution_plot(y_test, y_pred):
+    residuals = y_test - y_pred
+
+    plt.figure(figsize=(8, 6))
+    plt.hist(residuals, bins=35, color=PLOT_COLOR, alpha=0.78, edgecolor="white")
+    plt.axvline(0, color=REFERENCE_COLOR, linewidth=2)
+    plt.axvline(residuals.mean(), color="#2f855a", linewidth=2, linestyle="--")
+    plt.xlabel("Rezidual (stvarno - predikovano)")
+    plt.ylabel("Broj instanci")
+    plt.title("Raspodela gresaka modela")
+    plt.grid(True, axis="y", color=GRID_COLOR, linewidth=0.8, alpha=0.8)
+    plt.legend(["Nulta greska", "Prosecna greska"])
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / "residual_distribution.png")
+    plt.close()
+
+
+def save_prediction_distribution_plot(y_test, y_pred):
+    plt.figure(figsize=(8, 6))
+    bins = np.linspace(0, 1, 31)
+    plt.hist(y_test, bins=bins, alpha=0.58, label="Stvarno", color="#2f855a")
+    plt.hist(y_pred, bins=bins, alpha=0.58, label="Predikovano", color=PLOT_COLOR)
+    plt.xlabel("final_hawk")
+    plt.ylabel("Broj instanci")
+    plt.title("Raspodela stvarnih i predikovanih vrednosti")
+    plt.grid(True, axis="y", color=GRID_COLOR, linewidth=0.8, alpha=0.8)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / "prediction_distribution.png")
     plt.close()
 
 
@@ -96,14 +169,17 @@ def save_feature_importance(feature_importance):
         index=False,
     )
 
-    plt.figure(figsize=(8, 6))
-    plt.bar(
-        feature_importance["Feature"],
-        feature_importance["Importance"],
+    sorted_importance = feature_importance.sort_values("Importance")
+
+    plt.figure(figsize=(9, 6))
+    plt.barh(
+        sorted_importance["Feature"],
+        sorted_importance["Importance"],
+        color=PLOT_COLOR,
     )
-    plt.xticks(rotation=45)
-    plt.ylabel("Vrednost")
+    plt.xlabel("Vaznost atributa")
     plt.title("Uticaj atributa na predikciju")
+    plt.grid(True, axis="x", color=GRID_COLOR, linewidth=0.8, alpha=0.8)
     plt.tight_layout()
     plt.savefig(FIGURES_DIR / "feature_importance.png")
     plt.close()
@@ -130,8 +206,10 @@ def main():
     y_pred = model.predict(X_test)
     metrics = calculate_metrics(y_test, y_pred)
 
-    save_actual_vs_predicted_plot(y_test, y_pred)
+    save_actual_vs_predicted_plot(y_test, y_pred, metrics)
     save_residual_plot(y_test, y_pred)
+    save_residual_distribution_plot(y_test, y_pred)
+    save_prediction_distribution_plot(y_test, y_pred)
     save_feature_importance(get_feature_importance(model, X_test.columns))
     save_evaluation_metrics(metrics)
 

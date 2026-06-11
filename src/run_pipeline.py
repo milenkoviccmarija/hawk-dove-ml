@@ -27,14 +27,6 @@ EXPECTED_OUTPUTS = [
 ]
 
 
-def print_data_flow_check():
-    print("\nProvera podele podataka:", flush=True)
-    print("- train: koristi se za fitovanje kandidatskih modela.", flush=True)
-    print("- validation: koristi se za izbor hiperparametara i najboljeg modela.", flush=True)
-    print("- test: koristi se samo u evaluate.py za finalnu proveru generalizacije.", flush=True)
-    print("- predict: koristi sacuvani model i scaler za novi scenario.", flush=True)
-
-
 def run_step(step_name, script_path):
     print(f"\n=== {step_name} ===", flush=True)
     subprocess.run(
@@ -56,8 +48,6 @@ def verify_outputs():
 
 
 def main():
-    print_data_flow_check()
-
     for step_name, script_path in PIPELINE_STEPS:
         run_step(step_name, script_path)
 

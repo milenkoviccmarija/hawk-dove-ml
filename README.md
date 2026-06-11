@@ -4,9 +4,7 @@ Ovaj projekat koristi simulirani Hawk-Dove model iz teorije igara i masinsko uce
 za predikciju finalnog udela hawk strategije u populaciji.
 
 Glavni zadatak je **regresija**, jer se predvidja kontinuirana vrednost
-`final_hawk` iz intervala `[0, 1]`. U projektu postoji i jedan manji
-klasifikacioni primer za cilj `hawk_dominant`, da bi se pokazalo zasto je
-regresija informativnija za ovaj problem.
+`final_hawk` iz intervala `[0, 1]`.
 
 ## Struktura projekta
 
@@ -23,9 +21,11 @@ hawk-dove-ml/
 │   ├── main.py              # generisanje Hawk-Dove dataseta
 │   ├── eda.py               # EDA i data wrangling izvestaji
 │   ├── preprocess.py        # podela podataka i skaliranje atributa
-│   ├── train.py             # treniranje, CV i izbor modela
+│   ├── train.py             # treniranje, tuning i izbor modela
 │   ├── evaluate.py          # evaluacija najboljeg modela
-│   └── predict.py           # primer koriscenja sacuvanog modela
+│   ├── predict.py           # primer koriscenja sacuvanog modela
+│   ├── export_model.py      # eksport modela za deployment
+│   └── app.py               # lokalni AI UI za unos scenarija i predikciju
 └── requirements.txt
 ```
 
@@ -51,6 +51,41 @@ python src/train.py
 python src/evaluate.py
 python src/predict.py
 ```
+
+## Eksport modela i AI UI
+
+Nakon treniranja modela, deployment paket se pravi komandom:
+
+```bash
+python src/export_model.py
+```
+
+Skripta kreira folder `deployment/` sa sledecim fajlovima:
+
+- `best_model.joblib` - eksportovani najbolji model
+- `standard_scaler.joblib` - scaler potreban za iste transformacije kao u treningu
+- `model_metadata.json` - opis ulaza, cilja, izlaza i metrika
+- `hawk_dove_model_bundle.zip` - ZIP paket za prenos deployment fajlova
+
+Lokalni korisnicki interfejs se pokrece komandom:
+
+```bash
+python src/app.py
+```
+
+Zatim se u browseru otvara:
+
+```text
+http://127.0.0.1:8000
+```
+
+Ako je port `8000` zauzet, aplikacija ce automatski probati sledeci slobodan
+port i ispisati tacan URL u terminalu.
+
+UI omogucava unos vrednosti atributa `V`, `C`, `initial_hawk`, `iterations`,
+`learning_rate`, `mutation_rate`, `environment_volatility` i `population_size`.
+Na osnovu sacuvanog modela i scalera prikazuje se predikcija `final_hawk`,
+vrednost `final_dove` i dominantna strategija.
 
 ## Dataset
 
@@ -136,8 +171,9 @@ Random Forest parametri `n_estimators`, `max_depth` i `min_samples_leaf`.
 
 Hiperparametri se biraju na validation skupu. Svaki kandidat se fituje na
 trening skupu, zatim se meri validation `RMSE` i `R2`. Za KNN se broj suseda
-bira preko kolena validation krive, dok se Ridge `alpha` i Random Forest
-kombinacija hiperparametara biraju prema najmanjem validation `RMSE`.
+bira preko kolena validation krive, sto predstavlja kompromis izmedju greske i
+slozenosti modela. Ridge `alpha` i Random Forest kombinacija hiperparametara
+biraju se prema najmanjem validation `RMSE`.
 
 Trenutno izabrani parametri su:
 
@@ -222,19 +258,6 @@ Skripta `src/predict.py` ucitava sacuvani scaler i najbolji model, zatim pravi
 predikciju za jedan novi primer ulaznih parametara. Ovaj fajl pokazuje osnovni
 deployment tok bez UI-a ili API-ja.
 
-## Klasifikacioni primer
-
-U `src/train.py` dodat je jedan primer klasifikacije pomocu logisticke regresije.
-Cilj je `hawk_dominant`, odnosno da li je finalni udeo hawk strategije veci od
-0.5.
-
-Ovaj deo pokazuje razliku izmedju regresije i klasifikacije:
-
-- klasifikacija daje samo klasu: hawk ili dove
-- regresija daje tacan procenjeni udeo `final_hawk`
-
-Zbog toga je regresija glavni zadatak ovog projekta.
-
 ## Trenutni rezultat
 
 Najbolji regresioni model je:
@@ -251,15 +274,3 @@ MSE: 0.0095
 RMSE: 0.0973
 R2: 0.8834
 ```
-
-Test rezultati kada se koriste samo najznacajniji atributi:
-
-```text
-MAE: 0.0735
-MSE: 0.0094
-RMSE: 0.0967
-R2: 0.8847
-```
-
-Klasifikacioni primer sa logistickom regresijom ima test accuracy oko `0.9173`,
-ali on resava jednostavniji zadatak jer predvidja samo dominantnu strategiju.

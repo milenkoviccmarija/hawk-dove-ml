@@ -3,6 +3,6 @@ Evaluacija najboljeg modela
 
 Model path: models/best_model.joblib
 Test MAE: 0.07389066516425633
-Test MSE: 0.009458912660848848
+Test MSE: 0.009458912660848846
 Test RMSE: 0.09725694145329086
 Test R2: 0.8834381305204438

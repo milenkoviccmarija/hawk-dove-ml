@@ -1,8 +1,9 @@
-Evaluacija najboljeg modela
-===========================
+==============================================
+Evaluacija najboljeg modela (preko Pipeline-a)
+==============================================
 
-Model path: models/best_model.joblib
-Test MAE: 0.07389066516425633
-Test MSE: 0.009458912660848846
-Test RMSE: 0.09725694145329086
-Test R2: 0.8834381305204438
+Putanja do modela: models/best_pipeline.joblib
+Test MAE (Srednja apsolutna greška):  0.07320
+Test MSE (Srednja kvadratna greška):   0.00935
+Test RMSE (Koren srednje kv. greške): 0.09671
+Test R2 score (Koeficijent determinacije): 0.88274

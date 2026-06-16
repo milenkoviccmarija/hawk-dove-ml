@@ -6,15 +6,12 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 from preprocess import FEATURE_COLUMNS, TARGET_COLUMN
 
-
 MODELS_DIR = Path("models")
 RESULTS_DIR = Path("results/metrics")
 DEPLOYMENT_DIR = Path("deployment")
 
-BEST_MODEL_PATH = MODELS_DIR / "best_model.joblib"
-SCALER_PATH = MODELS_DIR / "standard_scaler.joblib"
-DEPLOYED_MODEL_PATH = DEPLOYMENT_DIR / "best_model.joblib"
-DEPLOYED_SCALER_PATH = DEPLOYMENT_DIR / "standard_scaler.joblib"
+BEST_PIPELINE_PATH = MODELS_DIR / "best_pipeline.joblib"
+DEPLOYED_PIPELINE_PATH = DEPLOYMENT_DIR / "best_pipeline.joblib"
 METADATA_PATH = DEPLOYMENT_DIR / "model_metadata.json"
 BUNDLE_PATH = DEPLOYMENT_DIR / "hawk_dove_model_bundle.zip"
 
@@ -35,30 +32,26 @@ def load_metric_summary():
 
 def build_metadata():
     return {
-        "project": "Hawk-Dove ML",
-        "model_type": "regression",
+        "project": "Hawk-Dove ML Pipeline",
+        "model_type": "regression_pipeline",
         "target_column": TARGET_COLUMN,
         "feature_columns": FEATURE_COLUMNS,
-        "model_file": DEPLOYED_MODEL_PATH.name,
-        "scaler_file": DEPLOYED_SCALER_PATH.name,
+        "pipeline_file": DEPLOYED_PIPELINE_PATH.name,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "prediction_output": {
-            "final_hawk": "Predikovani finalni udeo hawk strategije.",
+            "final_hawk": "Predikovani finalni udeo hawk strategije (automatski skalirano unutar pipeline-a).",
             "final_dove": "1 - final_hawk.",
-            "dominant_strategy": "hawk ako je final_hawk > 0.5, inace dove.",
         },
         "metrics_summary": load_metric_summary(),
     }
 
 
 def create_bundle():
-    require_file(BEST_MODEL_PATH)
-    require_file(SCALER_PATH)
+    require_file(BEST_PIPELINE_PATH)
 
     DEPLOYMENT_DIR.mkdir(parents=True, exist_ok=True)
 
-    shutil.copy2(BEST_MODEL_PATH, DEPLOYED_MODEL_PATH)
-    shutil.copy2(SCALER_PATH, DEPLOYED_SCALER_PATH)
+    shutil.copy2(BEST_PIPELINE_PATH, DEPLOYED_PIPELINE_PATH)
 
     metadata = build_metadata()
     METADATA_PATH.write_text(
@@ -67,22 +60,17 @@ def create_bundle():
     )
 
     with ZipFile(BUNDLE_PATH, "w", compression=ZIP_DEFLATED) as archive:
-        archive.write(DEPLOYED_MODEL_PATH, arcname=DEPLOYED_MODEL_PATH.name)
-        archive.write(DEPLOYED_SCALER_PATH, arcname=DEPLOYED_SCALER_PATH.name)
+        archive.write(DEPLOYED_PIPELINE_PATH, arcname=DEPLOYED_PIPELINE_PATH.name)
         archive.write(METADATA_PATH, arcname=METADATA_PATH.name)
 
     return metadata
 
 
 def main():
-    metadata = create_bundle()
-
-    print("\nEksport modela je zavrsen.")
-    print(f"Model: {DEPLOYED_MODEL_PATH}")
-    print(f"Scaler: {DEPLOYED_SCALER_PATH}")
-    print(f"Metadata: {METADATA_PATH}")
-    print(f"ZIP paket: {BUNDLE_PATH}")
-    print(f"Atributi: {', '.join(metadata['feature_columns'])}")
+    print("Započinjemo pakovanje modela za produkciju...")
+    create_bundle()
+    print(f"Uspešno kreiran paket: {BUNDLE_PATH}")
+    print("Metapodaci uspešno generisani.")
 
 
 if __name__ == "__main__":

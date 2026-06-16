@@ -1,335 +1,41 @@
-Rezultati evaluacije regresionih modela
-======================================
+Rezultati evaluacije regresionih modela preko Cross-Validation i Pipeline-a
+========================================================================
 
-Izabrani modeli i razlog izbora
---------------------------------
-Baseline Dummy Regressor: Uzima se kao polazna tacka jer uvek predvidja srednju vrednost ciljne promenljive. Ako drugi modeli nisu bolji od njega, onda nisu naucili koristan obrazac iz atributa.
+Performanse modela na 5-Fold Cross-Validaciji (Svi Atributi):
+- Baseline Dummy Regressor:
+  Najbolji CV RMSE: 0.28296
+  Izabrani parametri: {}
+- Ridge Regression:
+  Najbolji CV RMSE: 0.12453
+  Izabrani parametri: {'model__alpha': 10.0}
+- KNN Regression:
+  Najbolji CV RMSE: 0.11887
+  Izabrani parametri: {'model__n_neighbors': 15}
+- Random Forest Regression:
+  Najbolji CV RMSE: 0.09626
+  Izabrani parametri: {'model__max_depth': 8, 'model__min_samples_leaf': 5, 'model__n_estimators': 200}
 
-Ridge Regression: Uzima se kao glavni linearni model jer je jednostavan za tumacenje, a L2 regularizacija smanjuje preprilagodjavanje i stabilizuje koeficijente kada su atributi povezani.
+Performanse modela na 5-Fold Cross-Validaciji (Izabrani Atributi):
+- Baseline Dummy Regressor (Selected Features):
+  Najbolji CV RMSE: 0.28296
+  Izabrani parametri: {}
+- Ridge Regression (Selected Features):
+  Najbolji CV RMSE: 0.12450
+  Izabrani parametri: {'model__alpha': 10.0}
+- KNN Regression (Selected Features):
+  Najbolji CV RMSE: 0.09823
+  Izabrani parametri: {'model__n_neighbors': 21}
+- Random Forest Regression (Selected Features):
+  Najbolji CV RMSE: 0.09604
+  Izabrani parametri: {'model__max_depth': 8, 'model__min_samples_leaf': 5, 'model__n_estimators': 200}
 
-KNN Regression: Uzima se jer koristi slicnost izmedju scenarija. Za ovaj problem je prirodno proveriti da li slicne kombinacije V, C, pocetnog udela i parametara simulacije daju slican final_hawk.
+Izabrani najvažniji atributi: V, C, mutation_rate, learning_rate
 
-Random Forest Regression: Uzima se kao nelinearni model jer simulacija hawk-dove dinamike ima interakcije izmedju atributa, na primer V/C, learning_rate, mutation_rate i volatilnost. Ansambl stabala dobro hvata takve nelinearne odnose bez potrebe da ih rucno zadamo.
-
-Izbor broja suseda za KNN regresiju
------------------------------------
-Pretraga je radjena tako sto se svaki kandidat fituje na train skupu, a ocenjuje na validation skupu. Koleno je tacka validation RMSE krive najudaljenija od prave izmedju prve i poslednje tacke.
-Izabrani broj suseda na kolenu: 5
-
-k = 1
-Validation RMSE: 0.17358361098801073
-Validation R2: 0.6326173134724784
-Koleno: False
-
-k = 3
-Validation RMSE: 0.13392534883137155
-Validation R2: 0.7813110592657647
-Koleno: False
-
-k = 5
-Validation RMSE: 0.12623134930483265
-Validation R2: 0.8057165989489768
-Koleno: True
-
-k = 7
-Validation RMSE: 0.12446407914134226
-Validation R2: 0.8111185495496658
-Koleno: False
-
-k = 9
-Validation RMSE: 0.12187681931226883
-Validation R2: 0.8188895657631882
-Koleno: False
-
-k = 11
-Validation RMSE: 0.12093029686768493
-Validation R2: 0.8216917299360679
-Koleno: False
-
-k = 15
-Validation RMSE: 0.1194248439086799
-Validation R2: 0.8261035912651502
-Koleno: False
-
-k = 21
-Validation RMSE: 0.12050744234245957
-Validation R2: 0.822936523651083
-Koleno: False
-
-k = 31
-Validation RMSE: 0.12131592158108642
-Validation R2: 0.8205527315376622
-Koleno: False
-
-Izbor lambda/alpha parametra za Ridge regresiju
------------------------------------------------
-Izabrani alpha prema najmanjem validation RMSE: 0.0001
-
-Model: Ridge Regression
-alpha = 0.0001
-Validation RMSE: 0.12445047859784394
-Validation R2: 0.8111598265196257
-Najbolji validation RMSE: True
-
-Model: Ridge Regression
-alpha = 0.001
-Validation RMSE: 0.12445047982750042
-Validation R2: 0.8111598227878836
-Najbolji validation RMSE: False
-
-Model: Ridge Regression
-alpha = 0.01
-Validation RMSE: 0.12445049212453436
-Validation R2: 0.811159785469037
-Najbolji validation RMSE: False
-
-Model: Ridge Regression
-alpha = 0.1
-Validation RMSE: 0.12445061514178996
-Validation R2: 0.8111594121379875
-Najbolji validation RMSE: False
-
-Model: Ridge Regression
-alpha = 1.0
-Validation RMSE: 0.12445185000452304
-Validation R2: 0.8111556645733635
-Najbolji validation RMSE: False
-
-Model: Ridge Regression
-alpha = 10.0
-Validation RMSE: 0.12446466620612658
-Validation R2: 0.8111167677358245
-Najbolji validation RMSE: False
-
-Model: Ridge Regression
-alpha = 100.0
-Validation RMSE: 0.12463816458937292
-Validation R2: 0.8105898105349425
-Najbolji validation RMSE: False
-
-Izbor hiperparametara za Random Forest regresiju
------------------------------------------------
-Parametri se biraju kao kombinacija sa najmanjim validation RMSE.
-Izabrani parametri: {'n_estimators': 200, 'max_depth': 8, 'min_samples_leaf': 3}
-
-n_estimators = 100, max_depth = 8, min_samples_leaf = 5
-Slozenost: 160.0
-Validation RMSE: 0.09552979636477724
-Validation R2: 0.8887297785237688
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 12, min_samples_leaf = 5
-Slozenost: 240.0
-Validation RMSE: 0.0955556391476281
-Validation R2: 0.8886695685950086
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 8, min_samples_leaf = 3
-Slozenost: 266.6666666666667
-Validation RMSE: 0.09532794248219353
-Validation R2: 0.8891995083422737
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 16, min_samples_leaf = 5
-Slozenost: 320.0
-Validation RMSE: 0.09562542057797707
-Validation R2: 0.8885069066427829
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 8, min_samples_leaf = 5
-Slozenost: 320.0
-Validation RMSE: 0.09544276112728059
-Validation R2: 0.8889324381939039
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 12, min_samples_leaf = 3
-Slozenost: 400.0
-Validation RMSE: 0.09534192027252208
-Validation R2: 0.8891670129469994
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 12, min_samples_leaf = 5
-Slozenost: 480.0
-Validation RMSE: 0.09554956029076186
-Validation R2: 0.8886837329130333
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 16, min_samples_leaf = 3
-Slozenost: 533.3333333333334
-Validation RMSE: 0.0955899455468147
-Validation R2: 0.8885896145103186
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 8, min_samples_leaf = 3
-Slozenost: 533.3333333333334
-Validation RMSE: 0.09526057270940093
-Validation R2: 0.889356061941918
-Najbolji validation RMSE: True
-
-n_estimators = 200, max_depth = 16, min_samples_leaf = 5
-Slozenost: 640.0
-Validation RMSE: 0.09560282404000389
-Validation R2: 0.8885595926385594
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 12, min_samples_leaf = 3
-Slozenost: 800.0
-Validation RMSE: 0.09537103274864758
-Validation R2: 0.8890993173247199
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 8, min_samples_leaf = 1
-Slozenost: 800.0
-Validation RMSE: 0.09546052522167771
-Validation R2: 0.8888910898875306
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 16, min_samples_leaf = 3
-Slozenost: 1066.6666666666667
-Validation RMSE: 0.09557740378541692
-Validation R2: 0.8886188475180307
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 12, min_samples_leaf = 1
-Slozenost: 1200.0
-Validation RMSE: 0.09574742683548013
-Validation R2: 0.888222222240677
-Najbolji validation RMSE: False
-
-n_estimators = 100, max_depth = 16, min_samples_leaf = 1
-Slozenost: 1600.0
-Validation RMSE: 0.09583754492605925
-Validation R2: 0.8880117113013438
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 8, min_samples_leaf = 1
-Slozenost: 1600.0
-Validation RMSE: 0.0952808667876307
-Validation R2: 0.8893089142952104
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 12, min_samples_leaf = 1
-Slozenost: 2400.0
-Validation RMSE: 0.09546103455722565
-Validation R2: 0.8888899042274171
-Najbolji validation RMSE: False
-
-n_estimators = 200, max_depth = 16, min_samples_leaf = 1
-Slozenost: 3200.0
-Validation RMSE: 0.09572651903889628
-Validation R2: 0.8882710334088905
-Najbolji validation RMSE: False
-
-Odabir najznacajnijih atributa
-------------------------------
-Atributi su rangirani pomocu feature_importances_ vrednosti iz tuniranog Random Forest modela.
-Izabrani atributi: V, C, mutation_rate, learning_rate
-
-V: 0.5520577509320441
-C: 0.41361007231135205
-mutation_rate: 0.010427457196698395
-learning_rate: 0.010264660402687904
-population_size: 0.0035570012219840303
-iterations: 0.003518913967765616
-environment_volatility: 0.0034536267559015224
-initial_hawk: 0.003110517211566546
-
-Poredjenje modela sa svim i izabranim atributima
------------------------------------------------
-Skup atributa: all_features
-Model: Baseline Dummy Regressor
-Validation MAE: 0.2503559908048837
-Validation MSE: 0.08216803713903054
-Validation RMSE: 0.2866496766770033
-Validation R2: -0.0018533645341345384
-
-Skup atributa: all_features
-Model: Ridge Regression (alpha=0.0001)
-Validation MAE: 0.09707262133399651
-Validation MSE: 0.015487921623232415
-Validation RMSE: 0.12445047859784394
-Validation R2: 0.8111598265196257
-
-Skup atributa: all_features
-Model: KNN Regression (k=5)
-Validation MAE: 0.09375698744415703
-Validation MSE: 0.01593435354731868
-Validation RMSE: 0.12623134930483265
-Validation R2: 0.8057165989489768
-
-Skup atributa: all_features
-Model: Random Forest Regression
-Validation MAE: 0.07206513068503659
-Validation MSE: 0.00907457671292306
-Validation RMSE: 0.09526057270940093
-Validation R2: 0.8893560619419181
-
-Skup atributa: selected_features
-Model: Baseline Dummy Regressor
-Validation MAE: 0.2503559908048837
-Validation MSE: 0.08216803713903054
-Validation RMSE: 0.2866496766770033
-Validation R2: -0.0018533645341345384
-
-Skup atributa: selected_features
-Model: Ridge Regression (alpha=0.0001)
-Validation MAE: 0.09709102689388678
-Validation MSE: 0.015496163888275339
-Validation RMSE: 0.12448358883111998
-Validation R2: 0.8110593307398535
-
-Skup atributa: selected_features
-Model: KNN Regression (k=5)
-Validation MAE: 0.07956279898732564
-Validation MSE: 0.011023583533419578
-Validation RMSE: 0.10499325470438364
-Validation R2: 0.8655923320464293
-
-Skup atributa: selected_features
-Model: Random Forest Regression
-Validation MAE: 0.07216423032791688
-Validation MSE: 0.009093068796454606
-Validation RMSE: 0.0953575838434186
-Validation R2: 0.8891305928088051
-
-Model: Baseline Dummy Regressor
-Validation MAE: 0.2503559908048837
-Validation MSE: 0.08216803713903054
-Validation RMSE: 0.2866496766770033
-Validation R2: -0.0018533645341345384
-
-Model: Ridge Regression (alpha=0.0001)
-Validation MAE: 0.09707262133399651
-Validation MSE: 0.015487921623232415
-Validation RMSE: 0.12445047859784394
-Validation R2: 0.8111598265196257
-
-Model: KNN Regression (k=5)
-Validation MAE: 0.09375698744415703
-Validation MSE: 0.01593435354731868
-Validation RMSE: 0.12623134930483265
-Validation R2: 0.8057165989489768
-
-Model: Random Forest Regression
-Validation MAE: 0.07206513068503659
-Validation MSE: 0.00907457671292306
-Validation RMSE: 0.09526057270940093
-Validation R2: 0.8893560619419181
-
-Najbolji model prema validation skupu
-------------------------------------
-Model: Random Forest Regression
-Validation MAE: 0.07206513068503659
-Validation MSE: 0.00907457671292306
-Validation RMSE: 0.09526057270940093
-Validation R2: 0.8893560619419181
-
-Najbolji model sa izabranim atributima prema validation skupu
--------------------------------------------------------------
-Model: Random Forest Regression
-Atributi: V, C, mutation_rate, learning_rate
-Validation MAE: 0.07216423032791688
-Validation MSE: 0.009093068796454606
-Validation RMSE: 0.0953575838434186
-Validation R2: 0.8891305928088051
-
+=========================================
+FINALNI REZULTATI NA SKRIVENOM TEST SKUPU
+Izabrani model: Random Forest Regression
+=========================================
+Test MAE:  0.07320
+Test MSE:  0.00935
+Test RMSE: 0.09671
+Test R2:   0.88274

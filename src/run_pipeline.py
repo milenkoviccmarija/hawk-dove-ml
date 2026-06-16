@@ -12,18 +12,15 @@ PIPELINE_STEPS = [
     ("Primer predikcije", Path("src/predict.py")),
 ]
 
+
 EXPECTED_OUTPUTS = [
     Path("data/raw/hawk_dove_dataset.csv"),
-    Path("data/processed/X_train_scaled.csv"),
-    Path("data/processed/X_val_scaled.csv"),
-    Path("data/processed/X_test_scaled.csv"),
-    Path("models/standard_scaler.joblib"),
-    Path("models/best_model.joblib"),
+    Path("data/processed/X_train.csv"),
+    Path("data/processed/X_test.csv"),
+    Path("models/best_pipeline.joblib"),  
     Path("results/metrics/results_summary.txt"),
     Path("results/metrics/evaluation_summary.txt"),
-    Path("results/figures/hyperparameter_elbow.png"),
-    Path("results/figures/actual_vs_predicted.png"),
-    Path("results/figures/residual_plot.png"),
+    Path("results/figures/hyperparameter_cv_scores.png"), 
 ]
 
 

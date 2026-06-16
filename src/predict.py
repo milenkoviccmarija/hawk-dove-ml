@@ -4,10 +4,7 @@ from pathlib import Path
 
 from preprocess import FEATURE_COLUMNS
 
-
-BEST_MODEL_PATH = Path("models/best_model.joblib")
-SCALER_PATH = Path("models/standard_scaler.joblib")
-
+BEST_PIPELINE_PATH = Path("models/best_pipeline.joblib")
 
 EXAMPLE_SCENARIO = {
     "V": 12.0,
@@ -22,14 +19,16 @@ EXAMPLE_SCENARIO = {
 
 
 def predict_final_hawk(scenario):
-    model = load(BEST_MODEL_PATH)
-    scaler = load(SCALER_PATH)
+    if not BEST_PIPELINE_PATH.exists():
+        raise FileNotFoundError(
+            f"Nedostaje trenirani pipeline na lokaciji {BEST_PIPELINE_PATH}. Pokreni prvo train.py."
+        )
+        
+    pipeline = load(BEST_PIPELINE_PATH)
 
     scenario_df = pd.DataFrame([scenario], columns=FEATURE_COLUMNS)
-    scenario_scaled = scaler.transform(scenario_df)
-    scenario_scaled = pd.DataFrame(scenario_scaled, columns=FEATURE_COLUMNS)
-
-    prediction = model.predict(scenario_scaled)[0]
+    
+    prediction = pipeline.predict(scenario_df)[0]
     prediction = max(0, min(1, prediction))
 
     return prediction
@@ -45,8 +44,7 @@ def main():
 
     print("\nPredikcija:")
     print(f"final_hawk: {prediction:.4f}")
-    print(f"final_dove: {1 - prediction:.4f}")
-    print(f"dominant_strategy: {dominant_strategy}")
+    print(f"Dominantna strategija: {dominant_strategy}")
 
 
 if __name__ == "__main__":

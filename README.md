@@ -1,276 +1,144 @@
-# Hawk-Dove ML projekat
+# Hawk-Dove ML
 
-Ovaj projekat koristi simulirani Hawk-Dove model iz teorije igara i masinsko ucenje
-za predikciju finalnog udela hawk strategije u populaciji.
+Projekat iz predmeta **Sistemi sa učenjem i samoorganizacijom (SAUSAU)** koji primenjuje mašinsko učenje na simulaciju Hawk-Dove evolutivne teorije igara.
 
-Glavni zadatak je **regresija**, jer se predvidja kontinuirana vrednost
-`final_hawk` iz intervala `[0, 1]`.
+## Problem
+
+Hawk-Dove model je klasičan model evolutivne teorije igara koji opisuje kako se dve strategije — **Hawk (Jastreb)** i **Dove (Golub)** — takmiče za resurs vrednosti V uz potencijalnu cenu konflikta C. Ravnotežni udeo hawk strategije u populaciji zavisi od parametara okruženja, dinamike učenja i stohastičnih efekata.
+
+Cilj projekta je izgradnja regresionog ML modela koji na osnovu parametara simulacije predviđa **finalni udeo hawk strategije** (`final_hawk`) u populaciji.
+
+## Skup podataka
+
+Podaci su generisani simulacijom (`src/main.py`) koja implementira replikator dinamiku sa sledećim parametrima:
+
+| Atribut | Opis |
+|---|---|
+| `V` | Vrednost resursa |
+| `C` | Cena konflikta |
+| `initial_hawk` | Početni udeo hawk strategije |
+| `iterations` | Broj iteracija simulacije |
+| `learning_rate` | Stopa učenja |
+| `mutation_rate` | Stopa mutacije |
+| `environment_volatility` | Volatilnost okruženja |
+| `population_size` | Veličina populacije |
+| `final_hawk` | **Ciljna promenljiva** — finalni udeo hawk strategije |
+
+Dataset sadrži **10 000 instanci** generisanih nasumičnim uzorkovanjem parametara.
 
 ## Struktura projekta
 
-```text
+```
 hawk-dove-ml/
 ├── data/
-│   ├── raw/                 # generisani sirovi dataset
-│   └── processed/           # skalirani train/validation/test podaci
-├── models/                  # sacuvani scaler i najbolji model
+│   ├── raw/                    # Sirovi generisani dataset
+│   └── processed/              # Train/test skupovi nakon splita
+├── models/                     # Sačuvani ML pipeline
+├── deployment/                 # Paket za produkciju (ZIP bundle)
 ├── results/
-│   ├── figures/             # evaluacioni i EDA grafikoni
-│   └── metrics/             # metrike i tekstualni izvestaji
-├── src/
-│   ├── main.py              # generisanje Hawk-Dove dataseta
-│   ├── eda.py               # EDA i data wrangling izvestaji
-│   ├── preprocess.py        # podela podataka i skaliranje atributa
-│   ├── train.py             # treniranje, tuning i izbor modela
-│   ├── evaluate.py          # evaluacija najboljeg modela
-│   ├── predict.py           # primer koriscenja sacuvanog modela
-│   ├── export_model.py      # eksport modela za deployment
-│   └── app.py               # lokalni AI UI za unos scenarija i predikciju
-└── requirements.txt
+│   ├── figures/
+│   │   ├── eda/                # EDA grafikoni
+│   │   └── evaluation/         # Grafikoni evaluacije modela
+│   └── metrics/                # Tekstualni izveštaji i metrike
+└── src/
+    ├── main.py                 # Generisanje dataseta simulacijom
+    ├── eda.py                  # Eksplorativna analiza podataka
+    ├── preprocess.py           # Čišćenje i podela podataka
+    ├── train.py                # Treniranje i podešavanje hiperparametara
+    ├── evaluate.py             # Finalna evaluacija na test skupu
+    ├── predict.py              # Primer predikcije
+    ├── export_model.py         # Pakovanje modela za deployment
+    ├── app.py                  # Lokalni web UI za predikciju
+    └── run_pipeline.py         # Pokretanje celog pipeline-a jednom komandom
 ```
 
-## Instalacija
+## Pokretanje
 
-Preporuceno je koristiti virtuelno okruzenje.
+### Instalacija zavisnosti
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Pokretanje projekta
-
-Pokrenuti skripte ovim redosledom:
+### Pokretanje celog pipeline-a
 
 ```bash
-python src/main.py
-python src/eda.py
-python src/preprocess.py
-python src/train.py
-python src/evaluate.py
-python src/predict.py
+python src/run_pipeline.py
 ```
 
-## Eksport modela i AI UI
+Ovo izvršava sledeće korake redom:
+1. Generisanje dataseta
+2. EDA analiza
+3. Pretprocesiranje i podela na train/test
+4. Treniranje i podešavanje hiperparametara
+5. Finalna evaluacija na test skupu
+6. Primer predikcije
 
-Nakon treniranja modela, deployment paket se pravi komandom:
-
-```bash
-python src/export_model.py
-```
-
-Skripta kreira folder `deployment/` sa sledecim fajlovima:
-
-- `best_model.joblib` - eksportovani najbolji model
-- `standard_scaler.joblib` - scaler potreban za iste transformacije kao u treningu
-- `model_metadata.json` - opis ulaza, cilja, izlaza i metrika
-- `hawk_dove_model_bundle.zip` - ZIP paket za prenos deployment fajlova
-
-Lokalni korisnicki interfejs se pokrece komandom:
+### Pokretanje web UI-a
 
 ```bash
 python src/app.py
 ```
 
-Zatim se u browseru otvara:
+Nakon pokretanja, aplikacija je dostupna na `http://127.0.0.1:8000`.
 
-```text
-http://127.0.0.1:8000
+### Pakovanje modela za produkciju
+
+```bash
+python src/export_model.py
 ```
 
-Ako je port `8000` zauzet, aplikacija ce automatski probati sledeci slobodan
-port i ispisati tacan URL u terminalu.
+Kreira `deployment/hawk_dove_model_bundle.zip` sa modelom i metapodacima.
 
-UI omogucava unos vrednosti atributa `V`, `C`, `initial_hawk`, `iterations`,
-`learning_rate`, `mutation_rate`, `environment_volatility` i `population_size`.
-Na osnovu sacuvanog modela i scalera prikazuje se predikcija `final_hawk`,
-vrednost `final_dove` i dominantna strategija.
+## Metodologija
 
-## Dataset
+### Pretprocesiranje
 
-Dataset se generise simulacijom Hawk-Dove dinamike. Svaki red predstavlja jedan
-scenario sa razlicitim parametrima okruzenja i populacije.
+- Uklanjanje duplikata
+- Podela na trening (80%) i test (20%) skup
+- Skaliranje se vrši **unutar Pipeline-a** kako bi se sprečilo curenje podataka (data leakage)
 
-Najvazniji atributi:
+### Eksplorativna analiza
 
-- `V` - vrednost resursa
-- `C` - cena konflikta
-- `initial_hawk` - pocetni udeo hawk strategije
-- `iterations` - broj iteracija simulacije
-- `learning_rate` - brzina promene strategije
-- `mutation_rate` - stopa mutacije strategije
-- `environment_volatility` - promenljivost okruzenja
-- `population_size` - velicina populacije
+- Raspodela ciljne promenljive `final_hawk`
+- Korelaciona matrica numeričkih atributa
+- Scatter plotovi odnosa atributa i ciljne promenljive
+- Boxplotovi za detekciju outlier-a
 
-Ciljna promenljiva za regresiju je:
+### Modeli
 
-- `final_hawk` - finalni udeo hawk strategije
+Upoređena su četiri modela kroz 5-Fold Cross-Validation sa GridSearchCV:
 
-Klasifikaciona promenljiva koja se koristi samo za poredjenje je:
+| Model | Napomena |
+|---|---|
+| Dummy Regressor | Baseline — predviđa srednju vrednost |
+| Ridge Regression | Linearni model sa L2 regularizacijom |
+| KNN Regression | Nelinearni model baziran na susedima |
+| Random Forest Regression | Ansambl stabala odlučivanja |
 
-- `hawk_dominant` - vrednost 1 ako je `final_hawk > 0.5`, inace 0
+Svaki model je umotan u `sklearn.Pipeline` koji uključuje `StandardScaler`, čime je osigurano ispravno skaliranje tokom cross-validacije.
 
-## EDA i data wrangling
+### Odabir najznačajnijih atributa
 
-EDA deo se nalazi u `src/eda.py`. On pravi:
+Korišćen je `feature_importances_` iz Random Forest modela. Izdvojena su 4 najznačajnija atributa i modeli su ponovo evaluirani, a rezultati upoređeni sa originalnim skupom atributa.
 
-- pregled prvih redova dataseta
-- proveru tipova podataka
-- proveru nedostajucih vrednosti
-- proveru duplikata
-- deskriptivnu statistiku numerickih atributa
-- raspodelu ciljne promenljive
-- histograme numerickih atributa
-- boxplot grafikone za proveru outlier-a
-- korelacionu matricu
-- grafikone odnosa atributa sa ciljnom promenljivom
+### Evaluacija
 
-Rezultati se cuvaju u:
+Finalni model se evaluira na izdvojenom test skupu uz sledeće metrike:
+- **MAE** — srednja apsolutna greška
+- **MSE** — srednja kvadratna greška  
+- **RMSE** — koren srednje kvadratne greške
+- **R²** — koeficijent determinacije
 
-```text
-results/metrics/eda_summary.txt
-results/figures/eda/
-```
+Generišu se i vizuelizacije: grafikon stvarnih vs. predviđenih vrednosti, grafikon reziduala i Q-Q plot.
 
-## Pretprocesiranje
+## Rezultati
 
-Pretprocesiranje se nalazi u `src/preprocess.py` i obuhvata:
+Rezultati evaluacije dostupni su u `results/metrics/evaluation_summary.txt` nakon pokretanja pipeline-a.
 
-- uklanjanje duplikata
-- izbor atributa za model
-- podelu podataka na train, validation i test skup
-- standardizaciju atributa pomocu `StandardScaler`
-- cuvanje obradjenih skupova u `data/processed`
-- cuvanje scalera u `models/standard_scaler.joblib`
+## Deployment
 
-Podela je:
-
-- 70% trening skup
-- 15% validation skup
-- 15% test skup
-
-## Modeli
-
-U regresionom delu koriste se cetiri reprezentativna modela:
-
-- Baseline Dummy Regressor
-- Ridge Regression
-- KNN Regression
-- Random Forest Regression
-
-Ovi modeli su izabrani zato sto pokrivaju razlicite pristupe:
-
-- `DummyRegressor` sluzi kao baseline, odnosno najjednostavnija referenca
-- `Ridge Regression` predstavlja regularizovani linearni model
-- `KNN Regression` koristi slicnost izmedju scenarija evolucione igre
-- `Random Forest Regression` hvata nelinearne odnose i interakcije izmedju atributa
-
-Za Ridge se bira regularizacioni parametar `alpha`, za KNN broj suseda `k`, a za
-Random Forest parametri `n_estimators`, `max_depth` i `min_samples_leaf`.
-
-Hiperparametri se biraju na validation skupu. Svaki kandidat se fituje na
-trening skupu, zatim se meri validation `RMSE` i `R2`. Za KNN se broj suseda
-bira preko kolena validation krive, sto predstavlja kompromis izmedju greske i
-slozenosti modela. Ridge `alpha` i Random Forest kombinacija hiperparametara
-biraju se prema najmanjem validation `RMSE`.
-
-Trenutno izabrani parametri su:
-
-```text
-Ridge alpha: 0.0001
-KNN k: 5
-Random Forest n_estimators: 200
-Random Forest max_depth: 8
-Random Forest min_samples_leaf: 3
-```
-
-## Odabir znacajnih atributa
-
-Odabir najznacajnijih atributa radi se pomocu `feature_importances_` vrednosti iz
-tuniranog Random Forest modela. Atributi se rangiraju po vaznosti, zatim se modeli
-treniraju u dve varijante:
-
-- sa svim atributima
-- samo sa najznacajnijim atributima
-
-Najznacajniji atributi su:
-
-```text
-V
-C
-mutation_rate
-learning_rate
-```
-
-Ovakav rezultat je u skladu sa Hawk-Dove igrom: `V` i `C` direktno odredjuju
-isplativost agresivne strategije, dok `mutation_rate` i `learning_rate` uticu na
-dinamiku promene strategija kroz iteracije.
-
-Rezultati poredjenja cuvaju se u:
-
-```text
-results/metrics/feature_importance.csv
-results/metrics/feature_selection_results.csv
-results/metrics/model_results_selected_features.csv
-```
-
-## Evaluacija
-
-Za regresiju se koriste metrike:
-
-- MAE
-- MSE
-- RMSE
-- R2
-
-Modeli se porede na validation skupu, a najbolji model se zatim ocenjuje na test
-skupu. Baseline model uvek predvidja srednju vrednost ciljne promenljive iz
-trening skupa i koristi se kao pocetna referentna tacka. Rezultati se cuvaju u:
-
-```text
-results/metrics/model_results.csv
-results/metrics/regularization_results.csv
-results/metrics/knn_neighbor_results.csv
-results/metrics/random_forest_hyperparameter_results.csv
-results/metrics/feature_selection_results.csv
-results/metrics/results_summary.txt
-results/metrics/evaluation_summary.txt
-results/figures/hyperparameter_elbow.png
-```
-
-Evaluacioni grafikoni:
-
-- stvarne vs predikovane vrednosti
-- residual plot
-- feature importance grafikon
-- validation grafikon za izbor hiperparametara
-
-Nalaze se u:
-
-```text
-results/figures/
-```
-
-## Koriscenje sacuvanog modela
-
-Skripta `src/predict.py` ucitava sacuvani scaler i najbolji model, zatim pravi
-predikciju za jedan novi primer ulaznih parametara. Ovaj fajl pokazuje osnovni
-deployment tok bez UI-a ili API-ja.
-
-## Trenutni rezultat
-
-Najbolji regresioni model je:
-
-```text
-Random Forest Regression
-```
-
-Test rezultati sa svim atributima:
-
-```text
-MAE: 0.0739
-MSE: 0.0095
-RMSE: 0.0973
-R2: 0.8834
-```
+Model je dostupan kroz:
+- **Web UI** (`src/app.py`) — lokalni server na portu 8000 sa formom za unos parametara
+- **Python API** (`src/predict.py`) — direktno pozivanje `predict_final_hawk(scenario)` funkcije
+- **ZIP bundle** (`deployment/`) — prenosivi paket sa modelom i metapodacima

@@ -217,7 +217,6 @@ def main():
         file.write(f"\nIzabrani najvažniji atributi: {', '.join(selected_features)}\n")
         
         file.write("\n=========================================\n")
-        file.write(f"FINALNI REZULTATI NA SKRIVENOM TEST SKUPU\n")
         file.write(f"Izabrani model: {best_model_name}\n")
         file.write("=========================================\n")
         file.write(f"Test MAE:  {test_scores['MAE']:.5f}\n")

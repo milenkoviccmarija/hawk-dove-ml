@@ -10,6 +10,7 @@ PIPELINE_STEPS = [
     ("Treniranje i izbor modela na validation skupu", Path("src/train.py")),
     ("Finalna evaluacija generalizacije na test skupu", Path("src/evaluate.py")),
     ("Primer predikcije", Path("src/predict.py")),
+    ("Eksport modela", Path("src/export_model.py")),
 ]
 
 
@@ -21,6 +22,8 @@ EXPECTED_OUTPUTS = [
     Path("results/metrics/results_summary.txt"),
     Path("results/metrics/evaluation_summary.txt"),
     Path("results/figures/hyperparameter_cv_scores.png"), 
+    Path("deployment/model_metadata.json"),
+    Path("deployment/hawk_dove_model_bundle.zip"),
 ]
 
 

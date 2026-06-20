@@ -82,4 +82,9 @@ python src/app.py
 ```
 
 Nakon pokretanja, aplikacija je dostupna na `http://127.0.0.1:8000`.
+<<<<<<< HEAD
  direktno pozivanje `predict_final_hawk(scenario)` funkcije
+=======
+ direktno pozivanje `predict_final_hawk(scenario)` funkcije
+- **ZIP bundle** (`deployment/`) — prenosivi paket sa modelom i metapodacima
+>>>>>>> 086ac220d00c61ed983b00dae8d314f66e95a23d

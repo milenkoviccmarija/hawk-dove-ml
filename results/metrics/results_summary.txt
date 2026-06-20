@@ -32,7 +32,6 @@ Performanse modela na 5-Fold Cross-Validaciji (Izabrani Atributi):
 Izabrani najvažniji atributi: V, C, mutation_rate, learning_rate
 
 =========================================
-FINALNI REZULTATI NA SKRIVENOM TEST SKUPU
 Izabrani model: Random Forest Regression
 =========================================
 Test MAE:  0.07320

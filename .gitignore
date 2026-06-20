@@ -1,7 +1,5 @@
 __pycache__/
 .DS_Store
 Icon?
-*.csv
 .venv/
 .ipynb_checkpoints/.DS_Store
-results/.matplotlib/

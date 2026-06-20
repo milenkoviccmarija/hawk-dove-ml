@@ -1,0 +1,22 @@
+{
+  "project": "Hawk-Dove ML Pipeline",
+  "model_type": "regression_pipeline",
+  "target_column": "final_hawk",
+  "feature_columns": [
+    "V",
+    "C",
+    "initial_hawk",
+    "iterations",
+    "learning_rate",
+    "mutation_rate",
+    "environment_volatility",
+    "population_size"
+  ],
+  "pipeline_file": "best_pipeline.joblib",
+  "created_at_utc": "2026-06-20T12:25:43.709362+00:00",
+  "prediction_output": {
+    "final_hawk": "Predikovani finalni udeo hawk strategije (automatski skalirano unutar pipeline-a).",
+    "final_dove": "1 - final_hawk."
+  },
+  "metrics_summary": "==============================================\nEvaluacija najboljeg modela (preko Pipeline-a)\n==============================================\n\nPutanja do modela: models/best_pipeline.joblib\nTest MAE (Srednja apsolutna greška):  0.07320\nTest MSE (Srednja kvadratna greška):   0.00935\nTest RMSE (Koren srednje kv. greške): 0.09671\nTest R2 score (Koeficijent determinacije): 0.88274\n"
+}

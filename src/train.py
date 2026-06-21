@@ -226,7 +226,7 @@ def main():
 
     dump(final_best_pipeline, BEST_MODEL_PATH)
     
-    print(f"\nUspješno završeno! Najbolji model na CV-u je: {best_model_name}")
+    print(f"\nUspešno završeno! Najbolji model na CV-u je: {best_model_name}")
     print(f"Finalni R2 na test skupu: {test_scores['R2']:.4f}")
     print(f"Kompletan pipeline (skaler + model) je sačuvan na lokaciji: {BEST_MODEL_PATH}")
 
